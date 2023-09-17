@@ -1,0 +1,21 @@
+{
+	"name": "tabletop-demo",
+	"version": "0.0.1",
+	"private": true,
+	"scripts": {
+		"dev": "set NODE_ENV=dev && vite dev --port 3005",
+		"build": "set NODE_ENV=prod && vite build",
+		"preview": "vite preview"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-auto": "next",
+		"@sveltejs/adapter-static": "^2.0.3",
+		"@sveltejs/kit": "next",
+		"svelte": "^4.2.0",
+		"vite": "^4.4.9"
+	},
+	"type": "module",
+	"dependencies": {
+		"vite-plugin-windicss": "^1.9.1"
+	}
+}

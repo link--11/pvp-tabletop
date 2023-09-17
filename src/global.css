@@ -1,0 +1,18 @@
+:root {
+   --primary-color: #a41c32;
+   --text-color: #222222;
+   --bg-color: #ffffff;
+
+   --panel-color: #F5F5F5;
+   --panel-color-two: #EBEBEB;
+   --panel-color-three: #E0E0E0;
+
+   --shadow-color: rgb(160, 160, 160);
+
+   color: var(--text-color);
+   background-color: var(--bg-color);
+}
+
+.w-fit {
+   width: fit-content;
+}
