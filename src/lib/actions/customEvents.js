@@ -39,6 +39,7 @@ export function ctrlA (node) {
 
       if (key === 'a' && e.ctrlKey) {
          e.preventDefault()
+         e.stopPropagation()
          node.dispatchEvent(new CustomEvent('ctrlA'))
       }
    })

@@ -1,7 +1,6 @@
 <script>
-   import Card from '../board/Card.svelte'
+   import Card from '../opponent/Card.svelte'
    import Popup from './Popup.svelte'
-   import { share, publishLog } from '$lib/stores/connection.js'
 
    let popup
    let pokemon, trainer, energy, damage
@@ -15,41 +14,13 @@
       damage = slot.damage
       popup.open()
    }
-
-   function calcAttacks (pokes) {
-      if (!pokes) return []
-      const a = []
-      for (const p of pokes.toReversed()) {
-         if (p.a1_name) a.push(p.a1_name)
-         if (p.a2_name) a.push(p.a2_name)
-         if (p.a3_name) a.push(p.a3_name)
-      }
-      return a
-   }
-
-   $: attacks = calcAttacks($pokemon)
-
-   function announceAttack (name) {
-      publishLog(`Attack: ${name}`)
-      popup.close()
-   }
 </script>
 
 <Popup bind:this={popup}>
    <div class="w-fit m-auto">
       <div class="flex flex-col gap-2 items-center p-2">
          <span class="font-bold">{$pokemon[$pokemon.length - 1]?.name}</span>
-         <div>
-            <input type="text" class="p-1 bg-white rounded-md border border-black w-20"
-               bind:value={$damage} on:keydown={(e) => e.stopPropagation()}>
-            Damage
-         </div>
-      </div>
-
-      <div class="flex gap-2 justify-center mt-2 mb-2">
-         {#each attacks as attack}
-            <button class="attack primary" on:click={() => announceAttack(attack)}>{attack}</button>
-         {/each}
+         <div class="bg-[rgba(255,255,255,0.6)] px-2 py-1 rounded-md">{$damage} Damage</div>
       </div>
 
       <div class="flex flex-col gap-2 p-3 items-center">
@@ -77,9 +48,5 @@
 <style>
    button.action {
       @apply px-3 py-2 rounded-lg font-bold text-white bg-[var(--primary-color)];
-   }
-
-   button.attack {
-      @apply p-2 rounded-lg;
    }
 </style>

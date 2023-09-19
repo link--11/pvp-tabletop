@@ -22,7 +22,7 @@
 </script>
 
 {#if $dragging && card}
-   <div class="absolute z-20 pointer-events-none select-none" style="top: {$pos.y - $dragOffset.y}px; left: {$pos.x - $dragOffset.x}px;">
+   <div class="absolute z-30 pointer-events-none select-none" style="top: {$pos.y - $dragOffset.y}px; left: {$pos.x - $dragOffset.x}px;">
       {#if $selection.length > 1}
          <span class="absolute top-0 right-0 transform translate-x-[50%] translate-y-[-50%] px-2 py-1 rounded-full bg-dark-500 text-white font-bold">{$selection.length}</span>
       {/if}

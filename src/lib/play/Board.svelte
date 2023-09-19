@@ -1,15 +1,12 @@
 <script>
    import { getContext, setContext, onMount } from 'svelte'
-   import { base } from '$app/paths'
-   import { pile, slot } from './stores.js'
-   import { writable } from '$lib/stores/custom/writable.js'
-   import { discordMode } from '$lib/stores/play.js'
+   import { pile } from '$lib/stores/custom/cards.js'
    import { dragging } from '$lib/dnd/pointer.js'
 
    import Hand from './board/Hand.svelte'
    import Deck from './board/Deck.svelte'
-   import Discard from './board/Discard.svelte'
    import Prizes from './board/Prizes.svelte'
+   import Discard from './board/Discard.svelte'
    import LostZone from './board/LostZone.svelte'
    import Bench from './board/Bench.svelte'
    import Active from './board/Active.svelte'
@@ -19,8 +16,16 @@
    import DndCard from './DndCard.svelte'
    import Controls from './Controls.svelte'
 
+   import OppHand from './opponent/Hand.svelte'
+   import OppDeck from './opponent/Deck.svelte'
+   import OppPrizes from './opponent/Prizes.svelte'
+   import OppDiscard from './opponent/Discard.svelte'
+   import OppLostZone from './opponent/LostZone.svelte'
+   import OppBench from './opponent/Bench.svelte'
+   import OppActive from './opponent/Active.svelte'
+
    const { draw } = getContext('playActions')
-   const { hand, deck, discard, prizes, lz, bench, active, stadium, table } = getContext('playBoard')
+   const { hand, deck, discard, prizes, lz, table } = getContext('playBoard')
 
    /* Conditional Windows */
 
@@ -32,6 +37,9 @@
    import CardMenu from './dialogs/CardMenu.svelte'
    import SlotMenu from './dialogs/SlotMenu.svelte'
 
+   import OppInspection from './dialogs/OppInspection.svelte'
+   import OppSlotDetails from './dialogs/OppSlotDetails.svelte'
+
    let inspectionModal
    let selectionModal
    let slotModal
@@ -40,8 +48,15 @@
    let cardMenu
    let slotMenu
 
+   let oppInspectionModal
+   let oppSlotModal
+
    function openPile (pile) {
       inspectionModal.open(pile)
+   }
+
+   function openOppPile (pile) {
+      oppInspectionModal.open(pile)
    }
 
    let choice = pile()
@@ -61,6 +76,10 @@
       slotModal.open(slot)
    }
 
+   function openOppSlotDetails (slot) {
+      oppSlotModal.open(slot)
+   }
+
    function openDetails (card) {
       detailsModal.open(card)
    }
@@ -71,10 +90,12 @@
 
    /* Selections and actions on them */
 
-   let cardSelection = pile()
-   let slotSelection = pile()
-
-   let selectionPile = writable(null)
+   import { cardSelection, slotSelection, selectionPile,
+      selectCard, selectSlot,
+      moveSelection, toBench, toActive, toStadium, removeSlot,
+      attaching, evolving, startAttachEvolve, attachSelection,
+      resetSelection
+   } from '$lib/stores/player.js'
 
    function openCardMenu (x, y) {
       cardMenu.open(x, y, selectionPile)
@@ -84,174 +105,18 @@
       slotMenu.open(x, y)
    }
 
-   function selectCard (card, pile, push = false) {
-      slotSelection.clear() // only have 1 of the two selections active at a time
-      // allow multi select on the same pile only
-      if (!push || selectionPile !== pile) cardSelection.clear()
-      if (!$cardSelection.includes(card)) cardSelection.push(card)
-      else cardSelection.remove(card)
-      selectionPile = pile
-   }
-
-   function selectSlot (slot, push = false) {
-      cardSelection.clear()
-      if (!push) slotSelection.clear()
-      if (!$slotSelection.includes(slot)) slotSelection.push(slot)
-      else slotSelection.remove(slot)
-   }
-
-   /** move the selection to a "pile"  */
-   function moveSelection (pile, options = {}) {
-      if ($cardSelection.length) {
-         if (selectionPile === pile) return
-
-         let swap = []
-         if (options.switch) {
-            for (let i = 0; i < $cardSelection.length; i++) {
-               let card = options.bottom ? pile.shift() : pile.pop()
-               if (card) swap.push(card)
-            }
-         }
-
-         for (const card of $cardSelection) {
-            if (options.switch) {
-               const replacement = swap.pop()
-               if (replacement) {
-                  if (selectionPile === 'stadium') stadium.set(replacement)
-                  else selectionPile.swap(card, replacement)
-               }
-               else selectionPile.remove(card)
-            }
-            else if (selectionPile === 'stadium') stadium.set(null)
-            else selectionPile.remove(card)
-
-            if (options.bottom) pile.unshift(card)
-            else pile.push(card)
-         }
-
-      } else {
-
-         for (const slot of $slotSelection) {
-            if ($active === slot) active.set(null)
-            else bench.remove(slot)
-
-            pile.merge([
-               ...slot.trainer.get(),
-               ...slot.energy.get(),
-               ...slot.pokemon.get()
-            ])
-         }
-      }
-
-      if (options.shuffle) pile.shuffle()
-      resetSelection()
-   }
-
-   function toBench () {
-      if ($cardSelection.length) {
-
-         for (const card of $cardSelection) {
-            selectionPile.remove(card)
-            bench.add(slot(card))
-         }
-
-      } else {
-
-         for (const slot of $slotSelection) {
-            if ($active === slot) {
-               active.set(null)
-               bench.add(slot)
-            }
-         }
-      }
-
-      resetSelection()
-   }
-
-   function toActive () {
-      if ($cardSelection.length) {
-         if ($cardSelection.length !== 1) return
-         const card = $cardSelection[0]
-
-         selectionPile.remove(card)
-         if ($active) {
-            // move the current active out of the way
-            bench.add($active)
-         }
-         active.set(slot(card))
-
-      } else {
-         if ($slotSelection.length !== 1) return
-         const slot = $slotSelection[0]
-         if (slot === $active) return
-
-         bench.remove(slot)
-         if ($active) bench.add($active)
-         active.set(slot)
-      }
-
-      resetSelection()
-   }
-
-   function toStadium () {
-      if ($cardSelection.length !== 1 || selectionPile === 'stadium') return
-      const card = $cardSelection[0]
-
-      selectionPile.remove(card)
-      if ($stadium) {
-         discard.push($stadium)
-      }
-      stadium.set(card)
-
-      resetSelection()
-   }
-
-   function removeSlot (slot) {
-      if ($active === slot) active.set(null)
-      else bench.remove(slot)
-   }
-
-   let attaching = writable(false)
-   let evolving = writable(false)
-
    function startAE (evo = false) { // attach / evolve
       // close any open Deck or Discard pile, so that you can select the pokemon on board
       inspectionModal.close()
 
-      // override the other if both were clicked
-      // if clicked twice cancel the process
-      attaching.set(!evo && !$attaching)
-      evolving.set(evo && !$evolving)
-   }
-
-   function attachSelection (slot) {
-      for (const card of $cardSelection) {
-         if (selectionPile === 'stadium') stadium.set(null)
-         else selectionPile.remove(card)
-
-         if ($evolving) slot.pokemon.push(card)
-         else if (card.card_type === 'trainer') slot.trainer.push(card)
-         else slot.energy.push(card)
-      }
-
-      resetSelection()
-   }
-
-   function resetSelection () {
-      cardSelection.clear()
-      selectionPile = null
-
-      slotSelection.clear()
-
-      attaching.set(false)
-      evolving.set(false)
+      startAttachEvolve(evo)
    }
 
    setContext('boardActions', {
-      openPile,
+      openPile, openOppPile,
       choice, pick,
-      openSlotDetails, openDetails,
-      showMessage,
+      openSlotDetails, openOppSlotDetails,
+      openDetails, showMessage,
       openCardMenu, openSlotMenu,
       cardSelection, slotSelection,
       selectCard, selectSlot,
@@ -307,80 +172,14 @@
    })
 
    let game // the dom element, for setting css variables on it
-
-   /* Hand Popout */
-
-   let popout
-   let broadcast
-
-   function openPopout () {
-      popout = window.open(base + '/hand','hand','popup=true,width=1000,height=600')
-   }
-
-   const postHand = () => broadcast?.postMessage({ type: 'hand', message: $hand })
-   const postSelection = () => broadcast?.postMessage({ type: 'selection', message: $cardSelection })
-
-   function startBroadcast () {
-      broadcast = new BroadcastChannel('popout')
-
-      broadcast.addEventListener('message', ({ data }) => {
-         const { type, message } = data
-
-         if (type === 'hello') {
-            postHand()
-         }
-         else if (type === 'bye') {
-            discordMode.set(!$discordMode)
-         }
-         else if (type === 'select') {
-            const card = $hand.find(c => c._j === message.card._j)
-            selectCard(card, hand, message.push)
-         }
-         else if (type === 'action') {
-            if (message === 'discard') moveSelection(discard)
-            else if (message === 'hand') moveSelection(hand)
-            else if (message === 'lz') moveSelection(lz)
-            else if (message === 'prizes') moveSelection(prizes)
-            else if (message === 'bench') toBench()
-            else if (message === 'active') toActive()
-            else if (message === 'stadium') toStadium()
-            else if (message === 'deck') moveSelection(deck, { shuffle: true })
-            else if (message === 'top') moveSelection(deck)
-            else if (message === 'bottom') moveSelection(deck, { bottom: true })
-            else if (message === 'table') moveSelection(table)
-            else if (message === 'attach') startAE(false)
-            else if (message === 'evolve') startAE(true)
-            else if (message === 'reset') resetSelection()
-            else if (message === 'swap') moveSelection(deck, { switch: true })
-            else if (message === 'details') openDetails($cardSelection[0])
-         }
-         else if (type === 'key') {
-            keydown(message)
-         }
-      })
-
-      openPopout()
-   }
-
-   $: {
-      if ($discordMode) startBroadcast()
-      else {
-         popout?.close()
-         broadcast?.close()
-         popout, broadcast = null
-      }
-   }
-
-   $: $hand, postHand()
-   $: $cardSelection, postSelection()
 </script>
 
 <DndCard />
 
-<div class="fixed top-0 left-0 w-screen h-screen bg-gray-100 overflow-y-auto">
-   <div class="game flex flex-col h-full max-w-[1920px] m-auto select-none relative" bind:this={game}>
+<Controls {game} />
 
-      <Controls {game} />
+<div class="h-screen bg-gray-100 overflow-y-auto flex-1">
+   <div class="game flex flex-col h-full max-w-[1920px] m-auto select-none relative" bind:this={game}>
 
       <CardMenu bind:this={cardMenu} selection={cardSelection} />
       <SlotMenu bind:this={slotMenu} selection={slotSelection} />
@@ -390,7 +189,30 @@
       <SlotDetails bind:this={slotModal} />
       <CardDetails bind:this={detailsModal} />
 
+      <OppInspection bind:this={oppInspectionModal} />
+      <OppSlotDetails bind:this={oppSlotModal} />
+
       <div class="gameboard min-h-0 relative flex-1">
+
+         <div class="prizes2">
+            <OppPrizes />
+         </div>
+
+         <div class="deck2">
+            <OppDeck />
+         </div>
+
+         <div class="discard2">
+            <OppDiscard />
+         </div>
+
+         <div class="hand2">
+            <OppHand />
+         </div>
+
+         <div class="bench2">
+            <OppBench />
+         </div>
 
          <div class="prizes">
             <Prizes />
@@ -399,13 +221,15 @@
             <Stadium />
          </div>
          <div class="active">
-            <Active />
+            <div class="active2">
+               <OppActive />
+            </div>
+            <div class="active1">
+               <Active />
+            </div>
          </div>
          <div class="bench">
             <Bench />
-         </div>
-         <div class="lz">
-            <LostZone />
          </div>
          <div class="deck">
             <Deck />
@@ -436,8 +260,8 @@
    }
 
    .game {
-      --card-width: 136px;
-      --card-height: 189px;
+      --card-width: 97px;
+      --card-height: 135px;
    }
 
    .game :global(img.card) {
@@ -448,11 +272,13 @@
 
    .gameboard {
       display: grid;
-      grid-template-columns: 1fr 1fr 2fr 1fr 1fr;
-      grid-template-rows: repeat(4, 1fr);
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+      grid-template-rows: 0.8fr 1fr 1fr 1fr 1fr 0.9fr;
       grid-template-areas:
-         "prizes stadium active play lz"
-         "prizes . active play deck"
+         "hand2 hand2 hand2 hand2 hand2"
+         "discard2 bench2 bench2 bench2 prizes2"
+         "deck2 stadium active play2 prizes2"
+         "prizes stadium active play deck"
          "prizes bench bench bench discard"
          "hand hand hand hand hand";
       column-gap: 1rem;
@@ -477,6 +303,29 @@
 
    .active {
       grid-area: active;
+      display: grid;
+      grid-template-rows: 1fr 1fr;
+      position: relative;
+   }
+
+   .active:before {
+      content: ' ';
+      display: block;
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.5;
+      background-image: url('/pokeball.svg');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      pointer-events: none;
+   }
+
+   .active > div > :global(div:first-child) {
+      @apply w-full h-full;
    }
 
    .bench {
@@ -503,4 +352,45 @@
    .play {
       grid-area: play;
    }
+
+   .prizes2 {
+      grid-area: prizes2;
+      transform: scale(-1, -1);
+   }
+
+   .active2 {
+      transform: scale(-1, -1);
+   }
+
+   .bench2 {
+      grid-area: bench2;
+      transform: scale(-1, -1);
+   }
+
+   .lz2 {
+      grid-area: lz2;
+      transform: scale(-1, -1);
+   }
+
+   .deck2 {
+      grid-area: deck2;
+      transform: scale(-1, -1);
+   }
+
+   .discard2 {
+      grid-area: discard2;
+      transform: scale(-1, -1);
+   }
+
+   .hand2 {
+      grid-area: hand2;
+      border-top: 2px solid var(--text-color);
+      transform: scale(-1, -1);
+   }
+
+   .play2 {
+      grid-area: play2;
+      transform: scale(-1, -1);
+   }
+
 </style>

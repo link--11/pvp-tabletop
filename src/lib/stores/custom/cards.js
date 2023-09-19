@@ -4,10 +4,11 @@ import { shuffle } from '$lib/util/array.js'
 /**
  * Writable array store with some useful methods
  */
-export function pile () {
+export function pile (name = null) {
    const { get, set, subscribe, update } = writable([])
 
    return {
+      name,
       get, set, subscribe, update,
       push: (val) => {
          update(v => {
@@ -63,12 +64,18 @@ export function pile () {
             v.splice(v.indexOf(rem), 1, add)
             return v
          })
-      }
+      },
+      // removeById: (id) => {
+      //    update(v => {
+      //       v.splice(v.findIndex(card => card._id === id), 1)
+      //       return v
+      //    })
+      // }
    }
 }
 
 export function slots () {
-   const { set, subscribe, update } = writable([])
+   const { get, set, subscribe, update } = writable([])
 
    const add = (slot) => {
       update(v => {
@@ -89,20 +96,21 @@ export function slots () {
    }
 
    return {
-      set, subscribe, update,
+      get, set, subscribe, update,
       add, remove, clear
    }
 }
 
-export function slot (card) {
-   const pokemon = pile()
-   pokemon.push(card)
+export function slot (card = null, id = null) {
+   const sid = id || crypto.randomUUID()
+   const pokemon = pile(`${sid}.pokemon`)
+   if (card) pokemon.push(card)
 
    return {
-      id: crypto.randomUUID(),
+      id: sid,
       pokemon,
-      energy: pile(),
-      trainer: pile(),
+      energy: pile(`${sid}.energy`),
+      trainer: pile(`${sid}.trainer`),
       damage: writable(0)
    }
 }

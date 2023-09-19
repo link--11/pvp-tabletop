@@ -1,5 +1,5 @@
 :root {
-   --primary-color: #a41c32;
+   --primary-color: #1ca492;
    --text-color: #222222;
    --bg-color: #ffffff;
 
@@ -15,4 +15,8 @@
 
 .w-fit {
    width: fit-content;
+}
+
+.primary {
+   @apply bg-[var(--primary-color)] text-white;
 }

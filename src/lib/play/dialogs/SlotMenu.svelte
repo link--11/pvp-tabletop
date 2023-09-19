@@ -10,7 +10,7 @@
    export let selection
 
    $: heading = $selection.length === 1 ?
-      $selection[0].pokemon.get()[0].name : `${$selection.length} Pokémon`
+      $selection[0].pokemon.get().at(-1).name : `${$selection.length} Pokémon`
 
    let menu
 
@@ -33,7 +33,7 @@
    function damage (e) {
       const dmg = e.altKey ? 50 : 10
       for (const slot of $selection) {
-         slot.damage.update(before => before + dmg)
+         slot.damage.update(before => Number(before) + dmg)
       }
    }
 
@@ -54,7 +54,7 @@
    }
 
    function setDamage () {
-      let x = prompt('How much damage is on the Pokémon?')
+      let x = Number(prompt('How much damage is on the Pokémon?'))
       for (const slot of $selection) {
          slot.damage.set(x)
       }

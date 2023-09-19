@@ -1,9 +1,6 @@
 <script>
-   import { getContext } from 'svelte'
-   import Card from '../board/Card.svelte'
+   import Card from '../opponent/Card.svelte'
    import Popup from './Popup.svelte'
-
-   const { deck } = getContext('playBoard')
 
    let pile = null
    let popup
@@ -20,11 +17,6 @@
 
    export function close () {
       popup.close()
-   }
-
-   function closeAndShuffle () {
-      popup.close()
-      deck.shuffle()
    }
 </script>
 
@@ -47,9 +39,6 @@
 
    <svelte:fragment slot="buttons">
       <button class="action" on:click={() => popup.close()}>Close</button>
-      {#if pile === deck}
-         <button class="action" on:click={closeAndShuffle}>Close & Shuffle</button>
-      {/if}
    </svelte:fragment>
 </Popup>
 

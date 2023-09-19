@@ -49,8 +49,8 @@
 </script>
 
 <Popup bind:this={popup} on:closed={putBack}>
-   <div class="flex flex-wrap gap-1 p-2">
-      {#each $choice as card (card._j)}
+   <div class="flex flex-wrap gap-1 p-2 inspection">
+      {#each $choice as card (card._id)}
          <Card {card} pile={choice} />
       {/each}
    </div>
@@ -64,6 +64,11 @@
 </Popup>
 
 <style>
+   .inspection {
+      --card-width: 136px;
+      --card-height: 189px;
+   }
+
    button.action {
       @apply p-2 rounded-lg font-bold text-white bg-[var(--primary-color)];
    }

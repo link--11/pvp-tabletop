@@ -25,32 +25,10 @@
 
 </script>
 
-<div class="bg-logo" use:dnd={dndConfig}>
+<div use:dnd={dndConfig}>
    <div class="h-full flex justify-center items-center">
       {#if $active}
          <Slot bind:slot={$active} />
       {/if}
    </div>
 </div>
-
-<style>
-   .bg-logo {
-      @apply relative;
-   }
-
-   .bg-logo:before {
-      content: ' ';
-      display: block;
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      opacity: 0.6;
-      background-image: url('/limitless.svg');
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: center;
-      pointer-events: none;
-   }
-</style>

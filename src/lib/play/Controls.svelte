@@ -1,11 +1,12 @@
 <script>
    import { getContext, onMount } from 'svelte'
-   import { autoMulligan } from '$lib/stores/play.js'
+   import { autoMulligan } from '$lib/stores/settings.js'
+   import { publishLog, shareBoardstate } from '$lib/stores/connection.js'
    import { cog } from '$lib/icons/paths.js'
    import Icon from '$lib/components/Icon.svelte'
 
    const { deckValid, resetBoard, startGame, startTurn } = getContext('playActions')
-   const { turn, vstarUsed, gxUsed } = getContext('playStats')
+   const { vstarUsed, gxUsed } = getContext('playStats')
    const { showMessage } = getContext('boardActions')
 
    export let game // reference to the top level dom element
@@ -25,11 +26,15 @@
       if (!$deckValid && $autoMulligan) return
       const mulligans = startGame()
       if ($autoMulligan) showMessage(`${mulligans} Mulligans`)
+
+      publishLog('Setup' + ($autoMulligan ? ` - ${mulligans} Mulligans` : ''))
+      shareBoardstate()
    }
 
    function flipCoin () {
       const heads = Math.floor(Math.random() * 2)
       showMessage('Coin flip result: ' + (heads ? 'HEADS' : 'TAILS'))
+      publishLog('Coin flip: ' + (heads ? 'HEADS' : 'TAILS'))
    }
 
    function keydown (e) {
@@ -53,24 +58,19 @@
    let settings
 </script>
 
-<div class="flex gap-2 p-3 mb-2">
-   <div class="flex-1 flex gap-2 justify-end">
-      <button class="self-center" on:click|stopPropagation={() => settings.open()}>
-         <Icon path={cog} />
-      </button>
-      <button class="action" disabled={!$deckValid && $autoMulligan} on:click={start} title="Shortcut: N">New Game</button>
-      <button class="action" on:click={resetBoard}>Reset</button>
+<div class="self-center flex flex-col gap-2 p-3">
+   <button class="action" disabled={!$deckValid && $autoMulligan} on:click={start} title="Shortcut: N">Setup</button>
+   <button class="action" on:click={resetBoard}>Reset</button>
+
+   <div class="flex flex-col w-max rounded-lg border border-gray-400">
+      <button on:click={() => vstarUsed.set(!$vstarUsed)} class="p-2 rounded-t-lg" class:bg-yellow-200={$vstarUsed}>VSTAR Power</button>
+      <button on:click={() => gxUsed.set(!$gxUsed)} class="p-2 rounded-b-lg" class:bg-yellow-200={$gxUsed}>GX Attack</button>
    </div>
 
-   <div class="flex w-max rounded-lg border border-gray-400">
-      <button on:click={() => startTurn()} class="px-3 py-2" title="Shortcut: C" >Turn <span class="font-bold">{$turn}</span></button>
-      <button on:click={() => vstarUsed.set(!$vstarUsed)} class="p-2" class:bg-yellow-200={$vstarUsed}>VSTAR Power</button>
-      <button on:click={() => gxUsed.set(!$gxUsed)} class="p-2 rounded-r-lg" class:bg-yellow-200={$gxUsed}>GX Attack</button>
-   </div>
-
-   <div class="flex-1 flex">
-      <button class="action" on:click={flipCoin} title="Shortcut: F">Flip Coin</button>
-   </div>
+   <button class="action" on:click={flipCoin} title="Shortcut: F">Flip Coin</button>
+   <button on:click|stopPropagation={() => settings.open()}>
+      <Icon path={cog} />
+   </button>
 </div>
 
 <Settings bind:this={settings} bind:scale={scale} />

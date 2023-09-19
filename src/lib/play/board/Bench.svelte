@@ -31,11 +31,7 @@
 
 </script>
 
-<div class="p-1 focus:outline-none" use:dnd={dndConfig}
-   tabindex="0" use:ctrlA on:ctrlA={selectAll}>
-
-   <div class="px-1">Bench ({$bench.length})</div>
-
+<div class="p-1 focus:outline-none" use:dnd={dndConfig} tabindex="0" use:ctrlA on:ctrlA={selectAll}>
    <div class="flex gap-4">
       {#each $bench as slot (slot.id)}
          <Slot bind:slot={slot} />

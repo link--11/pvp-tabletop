@@ -8,7 +8,7 @@
    const { prizes, deck } = getContext('playBoard')
 
    let menu
-   let revealed = true
+   let revealed = false
 
    function switchVisibility () {
       revealed = !revealed
@@ -32,7 +32,7 @@
 <Pile pile={prizes} name="Prizes" bind:menu={menu}>
    <Vertical>
       <div class="p-1 grid grid-cols-2 gap-1 w-fit">
-         {#each $prizes as card (card._j)}
+         {#each $prizes as card (card._id)}
             <Card {card} pile={prizes} {revealed} />
          {/each}
       </div>

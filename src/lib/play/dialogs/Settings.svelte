@@ -1,5 +1,5 @@
 <script>
-   import { autoMulligan, discordMode } from '$lib/stores/play.js'
+   import { autoMulligan } from '$lib/stores/settings.js'
    import Popup from './Popup.svelte'
 
    let popup
@@ -27,16 +27,6 @@
          </label>
          <p class="text-sm">
             Scale down the size of card images if the field doesn't fit your screen.
-         </p>
-      </div>
-
-      <div class="p-4 bg-light-50 rounded-b-md">
-         <label class="px-1">
-            <input type="checkbox" bind:checked={$discordMode}>
-            Display hand in separate window
-         </label>
-         <p class="text-sm">
-            Enable this option if you want to hide your hand while sharing your screen with someone.
          </p>
       </div>
    </div>

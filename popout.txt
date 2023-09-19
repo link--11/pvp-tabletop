@@ -1,0 +1,65 @@
+/* Hand Popout */
+
+   let popout
+   let broadcast
+
+   function openPopout () {
+      popout = window.open(base + '/hand','hand','popup=true,width=1000,height=600')
+   }
+
+   const postHand = () => broadcast?.postMessage({ type: 'hand', message: $hand })
+   const postSelection = () => broadcast?.postMessage({ type: 'selection', message: $cardSelection })
+
+   function startBroadcast () {
+      broadcast = new BroadcastChannel('popout')
+
+      broadcast.addEventListener('message', ({ data }) => {
+         const { type, message } = data
+
+         if (type === 'hello') {
+            postHand()
+         }
+         else if (type === 'bye') {
+            discordMode.set(!$discordMode)
+         }
+         else if (type === 'select') {
+            const card = $hand.find(c => c._id === message.card._id)
+            selectCard(card, hand, message.push)
+         }
+         else if (type === 'action') {
+            if (message === 'discard') moveSelection(discard)
+            else if (message === 'hand') moveSelection(hand)
+            else if (message === 'lz') moveSelection(lz)
+            else if (message === 'prizes') moveSelection(prizes)
+            else if (message === 'bench') toBench()
+            else if (message === 'active') toActive()
+            else if (message === 'stadium') toStadium()
+            else if (message === 'deck') moveSelection(deck, { shuffle: true })
+            else if (message === 'top') moveSelection(deck)
+            else if (message === 'bottom') moveSelection(deck, { bottom: true })
+            else if (message === 'table') moveSelection(table)
+            else if (message === 'attach') startAE(false)
+            else if (message === 'evolve') startAE(true)
+            else if (message === 'reset') resetSelection()
+            else if (message === 'swap') moveSelection(deck, { switch: true })
+            else if (message === 'details') openDetails($cardSelection[0])
+         }
+         else if (type === 'key') {
+            keydown(message)
+         }
+      })
+
+      openPopout()
+   }
+
+   $: {
+      if ($discordMode) startBroadcast()
+      else {
+         popout?.close()
+         broadcast?.close()
+         popout, broadcast = null
+      }
+   }
+
+   $: $hand, postHand()
+   $: $cardSelection, postSelection()

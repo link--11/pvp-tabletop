@@ -16,6 +16,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"socket.io-client": "^4.7.2",
 		"vite-plugin-windicss": "^1.9.1"
 	}
 }

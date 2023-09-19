@@ -1,6 +1,7 @@
 <script>
-   import { getContext } from 'svelte'
+   import { onDestroy, getContext } from 'svelte'
    import { cardImage } from '$lib/util/assets.js'
+   import { share } from '$lib/stores/connection.js'
 
    const { discard } = getContext('playBoard')
    const {
@@ -15,12 +16,23 @@
    $: if (!$pokemon.length) {
       // discard the slot if it contains no pokemon (they can be moved away through the details view)
       discard.merge([ ...$trainer, ...$energy ])
+
+      share('cardsMoved', { cards: $trainer.map(card => card._id), from: trainer.name, to: 'discard' })
+      share('cardsMoved', { cards: $energy.map(card => card._id), from: energy.name, to: 'discard' })
+
       trainer.clear()
       energy.clear()
       removeSlot(slot)
+
+      share('slotDiscarded', { slotId: slot.id })
    }
 
    $: top = $pokemon[ $pokemon.length - 1]
+
+   const unsub = slot.damage.subscribe(value => {
+      share('damageUpdated', { slotId: slot.id, damage: value })
+	})
+	onDestroy(unsub)
 
    /* DnD */
 
@@ -95,12 +107,12 @@
          class:attach={$attaching} class:evolve={$evolving}>
    {/if}
 
-   {#each $energy as nrg, i (nrg._j)}
+   {#each $energy as nrg, i (nrg._id)}
       <img src="{cardImage(nrg, 'xs')}" alt="{nrg.name}" class="card absolute" draggable=false
          style="bottom: 15px; left: {(i + 1)* 25}px; z-index: {9 - i}">
    {/each}
 
-   {#each $trainer as tool, i (tool._j)}
+   {#each $trainer as tool, i (tool._id)}
       <img src="{cardImage(tool, 'xs')}" alt="{tool.name}" class="card absolute" draggable=false
          style="bottom: 30px; left: {$energy.length * 25 + (i + 1) * 35}px; z-index: {9 - i - $energy.length}">
    {/each}
