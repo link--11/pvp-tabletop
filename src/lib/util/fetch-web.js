@@ -1,7 +1,6 @@
 const target = import.meta.env.VITE_LIMITLESS_WEB
 
 function get (endpoint, callback) {
-   console.log(endpoint)
 
    fetch(target + endpoint, {
       method: 'GET',

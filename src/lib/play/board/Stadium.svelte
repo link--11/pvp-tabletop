@@ -1,6 +1,7 @@
 <script>
    import { getContext } from 'svelte'
    import Card from './Card.svelte'
+   import { dragging } from '$lib/dnd/pointer.js'
 
    const { stadium } = getContext('playBoard')
    const { toStadium, cardSelection: selection } = getContext('boardActions')
@@ -23,11 +24,10 @@
 
 </script>
 
-<div class="p-1" use:dnd={dndConfig}>
-   <div class="px-1">Stadium</div>
-   <div class="flex">
-      {#if $stadium}
-         <Card card={$stadium} pile="stadium" />
-      {/if}
-   </div>
+<div class="p-1 flex justify-center items-center"
+   class:pointer-events-auto={!!$stadium || $dragging}
+   use:dnd={dndConfig}>
+   {#if $stadium}
+      <Card card={$stadium} pile="stadium" />
+   {/if}
 </div>

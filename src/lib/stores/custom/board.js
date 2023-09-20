@@ -15,6 +15,7 @@ export function board () {
    const active = writable(null)
    const stadium = writable(null)
    const table = pile('table')
+   const pickup = pile('pickup')
 
    const vstarUsed = writable(false)
    const gxUsed = writable(false)
@@ -46,6 +47,7 @@ export function board () {
       active.set(null)
       stadium.set(null)
       table.clear()
+      pickup.clear()
    }
 
    function exportBoard () {
@@ -69,14 +71,15 @@ export function board () {
          stadium: stadium.get()?._id,
          table: expPile(table),
          vstarUsed: vstarUsed.get(),
-         gxUsed: gxUsed.get()
+         gxUsed: gxUsed.get(),
+         pickup: expPile(pickup)
       }
    }
 
    return {
       cards, deck, hand, prizes, discard, lz,
       bench, active, stadium, table,
-      vstarUsed, gxUsed,
+      vstarUsed, gxUsed, pickup,
       exportBoard, reset
    }
 }

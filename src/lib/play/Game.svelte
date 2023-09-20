@@ -35,7 +35,7 @@
    function setup () {
       resetBoard()
       deck.shuffle()
-      draw(7)
+      draw(7, true)
 
       for (let i = 0; i < 6; i++) {
          const card = deck.pop()

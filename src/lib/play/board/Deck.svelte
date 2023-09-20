@@ -3,10 +3,11 @@
    import ContextMenuOption from '$lib/components/ContextMenuOption.svelte'
    import Pile from './Pile.svelte'
    import cardback from '$lib/assets/cardback_int.png'
+   import { share } from '$lib/stores/connection.js'
 
    const { deck, discard, lz, prizes } = getContext('playBoard')
    const { draw } = getContext('playActions')
-   const { openPile, pick } = getContext('boardActions')
+   const { openPile, openSelection } = getContext('boardActions')
 
    let menu
 
@@ -17,12 +18,15 @@
 
    function moveTop (targetPile) {
       const card = deck.pop()
-      if (card) targetPile.push(card)
+      if (card) {
+         targetPile.push(card)
+         share('cardsMoved', { cards: [ card._id ], from: 'deck', to: targetPile.name })
+      }
    }
 
    function pickX (bottom = false) {
       let x = parseInt(prompt('Look at how many cards?'))
-      if (x) pick(deck, x, { bottom })
+      if (x) openSelection(deck, x, { bottom })
    }
 
    /* the click that opens the deck needs to stop propagation,

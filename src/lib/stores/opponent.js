@@ -1,10 +1,11 @@
 import { board } from './custom/board.js'
 import { slot } from './custom/cards.js'
 import { socket } from './connection.js'
+import { discardStadium } from './player.js'
 
 export const {
    cards, deck, hand, prizes, discard, lz,
-   bench, active, stadium, table,
+   bench, active, stadium, table, pickup,
    vstarUsed, gxUsed,
    reset
 } = board()
@@ -15,9 +16,16 @@ const reload = (deck) => {
 }
 
 const removeCard = (id, pile) => {
-   const card = pile.get().find(card => card._id === id)
-   pile.remove(card)
-   return card
+   if (pile === stadium) {
+      const card = stadium.get()
+      stadium.set(null)
+      return card
+
+   } else {
+      const card = pile.get().find(card => card._id === id)
+      pile.remove(card)
+      return card
+   }
 }
 
 const moveCards = (ids, source, target) => {
@@ -166,6 +174,15 @@ socket.on('slotDiscarded', ({ slotId }) => {
    removeSlot(slot)
 })
 
+socket.on('stadiumPlayed', ({ cardId, from }) => {
+   const card = removeCard(cardId, getPile(from))
+   stadium.set(card)
+   // discard your own stadium (if applicable) as a response
+   discardStadium()
+})
+
+/* */
+
 const slotRegex = /^([0-9a-z-]{36}).(pokemon|trainer|energy)$/i
 
 function getPile (name) {
@@ -177,6 +194,7 @@ function getPile (name) {
    else if (name === 'discard') return discard
    else if (name === 'lz') return lz
    else if (name === 'table') return table
+   else if (name === 'pickup') return pickup
 
    else if (regexRes = slotRegex.exec(name)) {
       const id = regexRes[1]
@@ -184,4 +202,6 @@ function getPile (name) {
       const slot = findSlot(id)
       return slot[type]
    }
+
+   else if (name === 'stadium') return stadium
 }

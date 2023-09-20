@@ -15,9 +15,9 @@
 
       targetPile.merge($hand)
       hand.clear()
+      menu.close()
 
       share('cardsMoved', { cards, from: 'hand', to: targetPile.name })
-      menu.close()
    }
 
    function shuffleBack () {
@@ -35,9 +35,10 @@
          deck.unshift(hand.pop())
       }
 
+      menu.close()
+
       share('cardsMoved', { cards, from: 'hand', to: 'deck' }) // order of opponents cards does not matter
       publishLog(`Shuffled hand to bottom of deck`)
-      menu.close()
    }
 
    function discardRandom () {

@@ -1,4 +1,4 @@
-import { post } from '$lib/util/fetch-web.js'
+import { get, post } from '$lib/util/fetch-web.js'
 import { board } from './custom/board.js'
 import { pile, slot } from './custom/cards.js'
 import { writable } from './custom/writable.js'
@@ -7,20 +7,24 @@ import { s } from '$lib/util/strings.js'
 
 export const {
    cards, deck, hand, prizes, discard, lz,
-   bench, active, stadium, table,
+   bench, active, stadium, table, pickup,
    vstarUsed, gxUsed,
    reset, exportBoard
 } = board()
 
-export function importDeck (txt, cb) {
-   post(`/api/dm/import`, { input: txt }, (res) => {
+export function importDeck (txt, cb, rd = false) {
+   const callback = (res) => {
       cards.set(res.cards)
       cb(res)
       share('deckLoaded', { deck: res.cards })
-   })
+      publishLog(rd ? 'random deck ⚆ _ ⚆' : 'Imported deck')
+   }
+
+   if (rd) get('/api/dm/random', callback)
+   else post(`/api/dm/import`, { input: txt }, callback)
 }
 
-export function draw (count = 1) {
+export function draw (count = 1, setup = false) {
    const cards = []
    for (let i = 0; i < count; i++) {
       if (deck.get().length) {
@@ -30,8 +34,24 @@ export function draw (count = 1) {
       }
    }
 
-   share('cardsMoved', { cards, from: 'deck', to: 'hand' })
-   publishLog(`Drew ${count} ${s('card', count)}`)
+   if (!setup) {
+      share('cardsMoved', { cards, from: 'deck', to: 'hand' })
+      publishLog(`Drew ${count} ${s('card', count)}`)
+   }
+}
+
+export function pick (source, count, options = {}) {
+   const cards = []
+
+   for (let i = 0; i < count; i++) {
+      const card = options.bottom ? source.shift() : source.pop()
+      if (card) {
+         pickup.push(card)
+         cards.push(card._id)
+      }
+   }
+
+   share('cardsMoved', { cards, from: source.name, to: 'pickup' })
 }
 
 export let cardSelection = pile()
@@ -57,10 +77,14 @@ export function selectSlot (slot, push = false) {
 
 /** move the selection to a "pile"  */
 export function moveSelection (pile, options = {}) {
-   const ids = []
 
    if (cardSelection.get().length) {
       if (selectionPile === pile) return
+
+      const ids = []
+      const swapIds = []
+
+      const from = selectionPile === 'stadium' ? 'stadium' : selectionPile.name
 
       let swap = []
       if (options.switch) {
@@ -73,22 +97,30 @@ export function moveSelection (pile, options = {}) {
       for (const card of cardSelection.get()) {
          ids.push(card._id)
 
+         let replacement = null
+
          if (options.switch) {
-            const replacement = swap.pop()
-            if (replacement) {
-               if (selectionPile === 'stadium') stadium.set(replacement)
-               else selectionPile.swap(card, replacement)
-            }
+            replacement = swap.pop()
+            if (replacement) swapIds.push(replacement._id)
+         }
+
+         if (from === 'stadium') {
+            if (replacement) stadium.set(replacement)
+            else stadium.set(null)
+         } else {
+            if (replacement) selectionPile.swap(card, replacement)
             else selectionPile.remove(card)
          }
-         else if (selectionPile === 'stadium') stadium.set(null)
-         else selectionPile.remove(card)
 
          if (options.bottom) pile.unshift(card)
          else pile.push(card)
       }
 
-      share('cardsMoved', { cards: ids, from: selectionPile.name, to: pile.name })
+      share('cardsMoved', { cards: ids, from, to: pile.name })
+      if (swapIds.length) {
+         if (from === 'stadium') share('stadiumPlayed', { cardId: swapIds[0], from: pile.name })
+         else share('cardsMoved', { cards: swapIds, from: pile.name, to: from })
+      }
 
    } else {
       const ids = []
@@ -174,14 +206,22 @@ export function toActive () {
    resetSelection()
 }
 
+export function discardStadium () {
+   const st = stadium.get()
+   if (st) {
+      discard.push(st)
+      stadium.set(null)
+      share('cardsMoved', { cards: [ st._id ], from: 'stadium', to: 'discard' })
+   }
+}
+
 export function toStadium () {
    if (cardSelection.get().length !== 1 || selectionPile === 'stadium') return
    const card = cardSelection.get()[0]
 
    selectionPile.remove(card)
-   if (stadium.get()) {
-      discard.push(stadium.get())
-   }
+
+   discardStadium()
    stadium.set(card)
 
    share('stadiumPlayed', { cardId: card._id, from: selectionPile.name })

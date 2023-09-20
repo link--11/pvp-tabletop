@@ -43,7 +43,6 @@
       if (key === 'n') {
          if (window.confirm('Start new game?')) start()
       }
-      else if (key === 'c') startTurn()
       else if (key === 'f') flipCoin()
    }
 

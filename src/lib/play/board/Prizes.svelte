@@ -4,6 +4,7 @@
    import Vertical from '$lib/components/scroll/Vertical.svelte'
    import Pile from './Pile.svelte'
    import Card from './Card.svelte'
+   import { share, publishLog } from '$lib/stores/connection.js'
 
    const { prizes, deck } = getContext('playBoard')
 
@@ -18,13 +19,19 @@
    function shuffle () {
       prizes.shuffle()
       menu.close()
+      publishLog('Shuffled prizes')
    }
 
    function shuffleBack () {
+      const cards = $prizes.map(card => card._id)
+
       deck.merge($prizes)
       prizes.clear()
       menu.close()
       deck.shuffle()
+
+      share('cardsMoved', { cards, from: 'prizes', to: 'deck' })
+      publishLog('Shuffled prizes into deck')
    }
 
 </script>

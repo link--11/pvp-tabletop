@@ -1,8 +1,8 @@
 <script>
+   import { getContext } from 'svelte'
    import ContextMenu from '$lib/components/ContextMenu.svelte'
    import ContextMenuOption from '$lib/components/ContextMenuOption.svelte'
-
-   import { getContext } from 'svelte'
+   import { share } from '$lib/stores/connection.js'
 
    const { hand, discard, active } = getContext('playBoard')
    const { openSlotDetails, moveSelection, toActive, toBench, removeSlot } = getContext('boardActions')
@@ -62,18 +62,34 @@
 
    function returnPokemon () {
       for (const slot of $selection) {
+         const pokemon = slot.pokemon.get()
+         const trainer = slot.trainer.get()
+         const energy = slot.energy.get()
+
+         hand.merge(pokemon)
+         discard.merge(energy)
+         discard.merge(trainer)
+
          removeSlot(slot)
-         hand.merge(slot.pokemon.get())
-         discard.merge(slot.energy.get())
-         discard.merge(slot.trainer.get())
+
+         share('cardsMoved', { cards: pokemon.map(card => card._id), from: slot.pokemon.name, to: 'hand' })
+         share('cardsMoved', { cards: energy.map(card => card._id), from: slot.energy.name, to: 'discard' })
+         share('cardsMoved', { cards: trainer.map(card => card._id), from: slot.trainer.name, to: 'discard' })
+
+         share('slotDiscarded', { slotId: slot.id })
       }
+
       menu.close()
    }
 
    function discardEnergy () {
       for (const slot of $selection) {
+         const cards = slot.energy.get().map(card => card._id)
+
          discard.merge(slot.energy.get())
          slot.energy.clear()
+
+         share('cardsMoved', { cards, from: slot.energy.name, to: 'discard' })
       }
       menu.close()
    }

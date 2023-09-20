@@ -2,13 +2,14 @@
    import { getContext } from 'svelte'
    import Card from '../board/Card.svelte'
    import Popup from './Popup.svelte'
+   import { share } from '$lib/stores/connection.js'
 
-   const { deck, discard, hand } = getContext('playBoard')
-   const { choice } = getContext('boardActions')
+   const { deck, discard, hand, lz } = getContext('playBoard')
+   import { pickup } from '$lib/stores/player.js'
 
    let popup
 
-   $: if (popup && $choice.length === 0) popup.close()
+   $: if (popup && $pickup.length === 0) popup.close()
 
    let bottom = false // to know where where to "put back" the cards when closed
 
@@ -18,17 +19,26 @@
    }
 
    function putBack () {
-      while ($choice.length) {
-         const card = choice.pop()
+      const cards = []
+
+      while ($pickup.length) {
+         const card = pickup.pop()
          if (bottom) deck.unshift(card)
          else deck.push(card)
+
+         cards.push(card._id)
       }
+
+      if (cards.length) share('cardsMoved', { cards, from: 'pickup', to: 'deck' })
    }
 
-   function shuffleBack () {
-      deck.merge($choice)
-      choice.clear()
-      deck.shuffle()
+   function closeAndMove (pile) {
+      const cards = $pickup.map(card => card._id)
+      popup.close()
+      pile.merge($pickup)
+      pickup.clear()
+
+      share('cardsMoved', { cards, from: 'pickup', to: pile.name })
    }
 
    function closeAndReturn () {
@@ -37,21 +47,15 @@
    }
 
    function closeAndShuffle () {
-      popup.close()
-      shuffleBack()
-   }
-
-   function closeAndMove (pile) {
-      popup.close()
-      pile.merge($choice)
-      choice.clear()
+      closeAndMove(deck)
+      deck.shuffle()
    }
 </script>
 
 <Popup bind:this={popup} on:closed={putBack}>
    <div class="flex flex-wrap gap-1 p-2 inspection">
-      {#each $choice as card (card._id)}
-         <Card {card} pile={choice} />
+      {#each $pickup as card (card._id)}
+         <Card {card} pile={pickup} />
       {/each}
    </div>
 
@@ -60,6 +64,7 @@
       <button class="action" on:click={closeAndShuffle}>Shuffle Back</button>
       <button class="action" on:click={() => closeAndMove(discard)}>Discard</button>
       <button class="action" on:click={() => closeAndMove(hand)}>To Hand</button>
+      <button class="action" on:click={() => closeAndMove(lz)}>To LZ</button>
    </svelte:fragment>
 </Popup>
 

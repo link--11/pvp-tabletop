@@ -3,6 +3,7 @@
    import { cardImage } from '$lib/util/assets.js'
    import ContextMenuOption from '$lib/components/ContextMenuOption.svelte'
    import Pile from './Pile.svelte'
+   import { share, publishLog } from '$lib/stores/connection.js'
 
    const { discard, deck } = getContext('playBoard')
    const { openPile } = getContext('boardActions')
@@ -11,10 +12,15 @@
    $: top = $discard[ $discard.length - 1 ]
 
    function shuffleBack () {
+      const cards = $discard.map(card => card._id)
+
       deck.merge($discard)
       discard.clear()
       menu.close()
       deck.shuffle()
+
+      share('cardsMoved', { cards, from: 'discard', to: 'deck' })
+      publishLog(`Shuffled discard into deck`)
    }
 </script>
 

@@ -20,8 +20,6 @@
       share('cardsMoved', { cards: $trainer.map(card => card._id), from: trainer.name, to: 'discard' })
       share('cardsMoved', { cards: $energy.map(card => card._id), from: energy.name, to: 'discard' })
 
-      trainer.clear()
-      energy.clear()
       removeSlot(slot)
 
       share('slotDiscarded', { slotId: slot.id })

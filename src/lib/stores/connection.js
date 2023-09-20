@@ -1,4 +1,6 @@
 const server = import.meta.env.VITE_PVP_SERVER
+const env = import.meta.env.VITE_ENV
+
 import { writable } from './custom/writable.js'
 import { cards, exportBoard } from './player.js'
 import { io } from 'socket.io-client'
@@ -38,7 +40,7 @@ export function leaveRoom () {
 }
 
 export function share (event, data) {
-   console.log('Sharing event ' + event, data)
+   if (env === 'dev') console.log('Sharing event ' + event, data)
    socket.emit(event, {
       ...data, room: room.get()
    })
@@ -86,11 +88,7 @@ export function react (event, cb) {
 
 export function shareBoardstate () {
    const deck = cards.get()
-   if (deck) {
-      console.log('Sending over my boardstate.')
-
-      share('boardState', { cards: deck, board: exportBoard() })
-   }
+   if (deck) share('boardState', { cards: deck, board: exportBoard() })
 }
 
 socket.on('createdRoom', ({ roomId }) => {
@@ -115,6 +113,8 @@ socket.on('opponentLeft', () => {
    pushToChat('left the room', 'important')
 })
 
-socket.onAny((eventName, ...args) => {
-   console.log('received event ' + eventName)
-})
+if (env === 'dev') {
+   socket.onAny((eventName, ...args) => {
+      console.log('received event ' + eventName)
+   })
+}

@@ -1,7 +1,7 @@
 <script>
    import { getContext, setContext, onMount } from 'svelte'
-   import { pile } from '$lib/stores/custom/cards.js'
    import { dragging } from '$lib/dnd/pointer.js'
+   import { pick } from '$lib/stores/player.js'
 
    import Hand from './board/Hand.svelte'
    import Deck from './board/Deck.svelte'
@@ -23,6 +23,8 @@
    import OppLostZone from './opponent/LostZone.svelte'
    import OppBench from './opponent/Bench.svelte'
    import OppActive from './opponent/Active.svelte'
+   import OppStadium from './opponent/Stadium.svelte'
+   import OppTable from './opponent/Temp.svelte'
 
    const { draw } = getContext('playActions')
    const { hand, deck, discard, prizes, lz, table } = getContext('playBoard')
@@ -59,16 +61,8 @@
       oppInspectionModal.open(pile)
    }
 
-   let choice = pile()
-
-   function pick (source, count, options = {}) {
-
-      for (let i = 0; i < count; i++) {
-         let card
-         if (options.bottom) card = source.shift()
-         else card = source.pop()
-         if (card) choice.push(card)
-      }
+   function openSelection (source, count, options = {}) {
+      pick(source, count, options)
       selectionModal.open(!!options.bottom)
    }
 
@@ -114,7 +108,7 @@
 
    setContext('boardActions', {
       openPile, openOppPile,
-      choice, pick,
+      openSelection,
       openSlotDetails, openOppSlotDetails,
       openDetails, showMessage,
       openCardMenu, openSlotMenu,
@@ -132,7 +126,7 @@
    function keydown (e) {
       const key = e.key.toLowerCase()
 
-      if (!isNaN(e.key)) e.altKey ? pick(deck, parseInt(e.key)) : draw(parseInt(e.key))
+      if (!isNaN(e.key)) e.altKey ? openSelection(deck, parseInt(e.key)) : draw(parseInt(e.key))
 
       else if (key === 'd') moveSelection(discard)
       else if (key === 'h') moveSelection(hand)
@@ -194,6 +188,10 @@
 
       <div class="gameboard min-h-0 relative flex-1">
 
+         <div class="hand2">
+            <OppHand />
+         </div>
+
          <div class="prizes2">
             <OppPrizes />
          </div>
@@ -206,20 +204,30 @@
             <OppDiscard />
          </div>
 
-         <div class="hand2">
-            <OppHand />
+         <div class="lz2">
+            <OppLostZone />
          </div>
 
          <div class="bench2">
             <OppBench />
          </div>
 
-         <div class="prizes">
-            <Prizes />
+         <div class="play2">
+            <OppTable />
          </div>
+
+         <div class="play">
+            <Table />
+         </div>
+
+         <div class="stadium2">
+            <OppStadium />
+         </div>
+
          <div class="stadium">
             <Stadium />
          </div>
+
          <div class="active">
             <div class="active2">
                <OppActive />
@@ -228,20 +236,29 @@
                <Active />
             </div>
          </div>
+
          <div class="bench">
             <Bench />
          </div>
-         <div class="deck">
-            <Deck />
+
+         <div class="lz">
+            <LostZone />
          </div>
+
          <div class="discard">
             <Discard />
          </div>
+
+         <div class="deck">
+            <Deck />
+         </div>
+
+         <div class="prizes">
+            <Prizes />
+         </div>
+
          <div class="hand">
             <Hand />
-         </div>
-         <div class="play">
-            <Table />
          </div>
       </div>
 
@@ -260,8 +277,8 @@
    }
 
    .game {
-      --card-width: 97px;
-      --card-height: 135px;
+      --card-width: 100px;
+      --card-height: 140px;
    }
 
    .game :global(img.card) {
@@ -272,15 +289,15 @@
 
    .gameboard {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-      grid-template-rows: 0.8fr 1fr 1fr 1fr 1fr 0.9fr;
+      grid-template-columns: 0.8fr 0.8fr 1fr 1.5fr 1fr 0.8fr 0.8fr;
+      grid-template-rows: 0.9fr 1fr 1fr 1fr 1fr 0.9fr;
       grid-template-areas:
-         "hand2 hand2 hand2 hand2 hand2"
-         "discard2 bench2 bench2 bench2 prizes2"
-         "deck2 stadium active play2 prizes2"
-         "prizes stadium active play deck"
-         "prizes bench bench bench discard"
-         "hand hand hand hand hand";
+         "hand2 hand2 hand2 hand2 hand2 hand2 hand2"
+         ". discard2 bench2 bench2 bench2 prizes2 prizes2"
+         "lz2 deck2 stadium active play prizes2 prizes2"
+         "prizes prizes stadium active play deck lz"
+         "prizes prizes bench bench bench discard ."
+         "hand hand hand hand hand hand hand";
       column-gap: 1rem;
    }
 
@@ -299,6 +316,8 @@
 
    .stadium {
       grid-area: stadium;
+      z-index: 10; /* above opponent's stadium! */
+      pointer-events: none; /* to click on opp stadium below - overwritten when own stadium is in play */
    }
 
    .active {
@@ -351,6 +370,7 @@
 
    .play {
       grid-area: play;
+      z-index: 10; /* shares table space with opp */
    }
 
    .prizes2 {
@@ -389,7 +409,12 @@
    }
 
    .play2 {
-      grid-area: play2;
+      grid-area: play;
+      transform: scale(-1, -1);
+   }
+
+   .stadium2 {
+      grid-area: stadium;
       transform: scale(-1, -1);
    }
 
