@@ -9,6 +9,7 @@ export const {
    cards, deck, hand, prizes, discard, lz,
    bench, active, stadium, table, pickup,
    vstarUsed, gxUsed,
+   prizesFlipped, handRevealed, pokemonHidden,
    reset, exportBoard
 } = board()
 
@@ -52,6 +53,7 @@ export function pick (source, count, options = {}) {
    }
 
    share('cardsMoved', { cards, from: source.name, to: 'pickup' })
+   publishLog(`Looking at ${count} ${s('card', count)} from ${options.bottom ? 'bottom of ' : ''}${source.name}`)
 }
 
 export let cardSelection = pile()
@@ -65,6 +67,14 @@ export function selectCard (card, pile, push = false) {
    if (!push || selectionPile !== pile) cardSelection.clear()
    if (!cardSelection.get().includes(card)) cardSelection.push(card)
    else cardSelection.remove(card)
+   selectionPile = pile
+}
+
+export function selectPile (pile) {
+   resetSelection()
+   for (const card of pile.get()) {
+      cardSelection.push(card)
+   }
    selectionPile = pile
 }
 

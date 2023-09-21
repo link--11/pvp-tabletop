@@ -7,6 +7,7 @@
    import { share, publishLog } from '$lib/stores/connection.js'
 
    const { hand, deck, discard } = getContext('playBoard')
+   import { handRevealed } from '$lib/stores/player.js'
 
    let menu
 
@@ -50,6 +51,12 @@
       share('cardsMoved', { cards: [ card._id ], from: 'hand', to: 'discard' })
       publishLog(`Randomly discarded ${card.name}`)
    }
+
+   function switchVisibility () {
+      handRevealed.update(val => !val)
+      menu.close()
+      share('handToggle', { revealed: handRevealed.get() })
+   }
 </script>
 
 <Pile pile={hand} name="Hand" bind:menu={menu}>
@@ -66,5 +73,6 @@
       <ContextMenuOption click={() => shuffleBack()} text="Shuffle all into Deck" />
       <ContextMenuOption click={() => marnie()} text="Shuffle all to bottom of Deck" />
       <ContextMenuOption click={() => discardRandom()} text="Discard Random Card" />
+      <ContextMenuOption click={switchVisibility} text={$handRevealed ? 'Hide hand' : 'Reveal hand'} />
    </svelte:fragment>
 </Pile>

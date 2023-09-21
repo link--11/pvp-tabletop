@@ -20,6 +20,10 @@ export function board () {
    const vstarUsed = writable(false)
    const gxUsed = writable(false)
 
+   const prizesFlipped = writable(false)
+   const handRevealed = writable(false)
+   const pokemonHidden = writable(false)
+
    function loadDeck () {
       let j = 1
       deck.clear()
@@ -38,6 +42,7 @@ export function board () {
 
       vstarUsed.set(false)
       gxUsed.set(false)
+      prizesFlipped.set(false)
 
       hand.clear()
       prizes.clear()
@@ -70,16 +75,20 @@ export function board () {
          bench: bench.get().map(slot => expSlot(slot)),
          stadium: stadium.get()?._id,
          table: expPile(table),
+         pickup: expPile(pickup),
          vstarUsed: vstarUsed.get(),
          gxUsed: gxUsed.get(),
-         pickup: expPile(pickup)
+         prizesFlipped: prizesFlipped.get(),
+         handRevealed: handRevealed.get(),
+         pokemonHidden: pokemonHidden.get()
       }
    }
 
    return {
       cards, deck, hand, prizes, discard, lz,
-      bench, active, stadium, table,
-      vstarUsed, gxUsed, pickup,
+      bench, active, stadium, table, pickup,
+      vstarUsed, gxUsed,
+      prizesFlipped, handRevealed, pokemonHidden,
       exportBoard, reset
    }
 }

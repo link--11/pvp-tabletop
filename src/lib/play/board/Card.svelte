@@ -44,7 +44,7 @@
          selectCard(card, pile, false)
       }
 
-      openCardMenu(e.clientX, e.clientY)
+      openCardMenu(e.clientX, e.clientY, revealed)
    }
 
 </script>
@@ -61,7 +61,7 @@
    {#if revealed}
       <img class="card" src="{cardImage(card, 'xs')}" alt="{card.name}" draggable=false>
    {:else}
-      <img class="card" src={cardback} alt="Prize Card" draggable=false>
+      <img class="card" src={cardback} alt="Hidden Card" draggable=false>
    {/if}
 </div>
 

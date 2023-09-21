@@ -1,7 +1,7 @@
 <script>
    import { getContext, setContext, onMount } from 'svelte'
    import { dragging } from '$lib/dnd/pointer.js'
-   import { pick } from '$lib/stores/player.js'
+   import { pick, pokemonHidden, handRevealed } from '$lib/stores/player.js'
 
    import Hand from './board/Hand.svelte'
    import Deck from './board/Deck.svelte'
@@ -63,7 +63,7 @@
 
    function openSelection (source, count, options = {}) {
       pick(source, count, options)
-      selectionModal.open(!!options.bottom)
+      selectionModal.open(!!options.bottom, source)
    }
 
    function openSlotDetails (slot) {
@@ -85,14 +85,14 @@
    /* Selections and actions on them */
 
    import { cardSelection, slotSelection, selectionPile,
-      selectCard, selectSlot,
+      selectCard, selectSlot, selectPile,
       moveSelection, toBench, toActive, toStadium, removeSlot,
       attaching, evolving, startAttachEvolve, attachSelection,
       resetSelection
    } from '$lib/stores/player.js'
 
-   function openCardMenu (x, y) {
-      cardMenu.open(x, y, selectionPile)
+   function openCardMenu (x, y, revealed = true) {
+      cardMenu.open(x, y, selectionPile, revealed)
    }
 
    function openSlotMenu (x, y) {
@@ -113,7 +113,7 @@
       openDetails, showMessage,
       openCardMenu, openSlotMenu,
       cardSelection, slotSelection,
-      selectCard, selectSlot,
+      selectCard, selectSlot, selectPile,
       moveSelection, resetSelection,
       toBench, toActive, toStadium,
       removeSlot,
@@ -150,6 +150,14 @@
       else if (key === 'e') startAE(true)
 
       else if (key === 'v') openPile(deck)
+
+      else if (key === 'x') {
+         if ($cardSelection.length) moveSelection(table)
+         else if ($table.length) {
+            selectPile(table)
+            moveSelection(hand)
+         }
+      }
 
       else if (key === 'escape') {
          if (!$dragging) resetSelection() // allow to Esc close popup while dragging a selection from deck
@@ -241,6 +249,8 @@
             <Bench />
          </div>
 
+         <div class="veil" class:applied={$pokemonHidden}></div>
+
          <div class="lz">
             <LostZone />
          </div>
@@ -257,7 +267,7 @@
             <Prizes />
          </div>
 
-         <div class="hand">
+         <div class="hand" class:revealed={$handRevealed}>
             <Hand />
          </div>
       </div>
@@ -327,6 +337,16 @@
       position: relative;
    }
 
+   .active1 {
+      grid-row: 2;
+      grid-column: 1;
+   }
+
+   .active2 {
+      grid-row: 1;
+      grid-column: 1;
+   }
+
    .active:before {
       content: ' ';
       display: block;
@@ -366,6 +386,10 @@
    .hand {
       grid-area: hand;
       border-top: 2px solid var(--text-color);
+   }
+
+   .hand.revealed {
+      @apply bg-yellow-50;
    }
 
    .play {
@@ -416,6 +440,19 @@
    .stadium2 {
       grid-area: stadium;
       transform: scale(-1, -1);
+   }
+
+   .veil {
+      pointer-events: none;
+      grid-row-start: prizes;
+      grid-row-end: bench;
+      grid-column-start: stadium;
+      grid-column-end: bench;
+   }
+
+   .veil.applied {
+      background-color: rgba(50,50,50,0.3);
+      z-index: 15;
    }
 
 </style>

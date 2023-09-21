@@ -1,12 +1,13 @@
 <script>
    import { getContext, onMount } from 'svelte'
    import { autoMulligan } from '$lib/stores/settings.js'
-   import { publishLog, shareBoardstate } from '$lib/stores/connection.js'
+   import { share, publishLog, shareBoardstate } from '$lib/stores/connection.js'
    import { cog } from '$lib/icons/paths.js'
    import Icon from '$lib/components/Icon.svelte'
 
+   import { pokemonHidden } from '$lib/stores/player.js'
    const { deckValid, resetBoard, startGame, startTurn } = getContext('playActions')
-   const { vstarUsed, gxUsed } = getContext('playStats')
+   const { turn, vstarUsed, gxUsed } = getContext('playStats')
    const { showMessage } = getContext('boardActions')
 
    export let game // reference to the top level dom element
@@ -22,7 +23,7 @@
 
    $: game?.style.setProperty('--card-width', initialWidth * scale + 'px')
 
-   function start () {
+   function setup () {
       if (!$deckValid && $autoMulligan) return
       const mulligans = startGame()
       if ($autoMulligan) showMessage(`${mulligans} Mulligans`)
@@ -31,10 +32,22 @@
       shareBoardstate()
    }
 
+   function reset () {
+      resetBoard()
+      turn.set(0)
+
+      share('boardReset')
+   }
+
    function flipCoin () {
       const heads = Math.floor(Math.random() * 2)
       showMessage('Coin flip result: ' + (heads ? 'HEADS' : 'TAILS'))
       publishLog('Coin flip: ' + (heads ? 'HEADS' : 'TAILS'))
+   }
+
+   function switchVisibility () {
+      pokemonHidden.update(val => !val)
+      share('pokemonToggle', { hidden: pokemonHidden.get() })
    }
 
    function keydown (e) {
@@ -43,7 +56,9 @@
       if (key === 'n') {
          if (window.confirm('Start new game?')) start()
       }
+      else if (key === 'c') startTurn()
       else if (key === 'f') flipCoin()
+      else if (key === 'z') switchVisibility()
    }
 
    onMount(() => {
@@ -57,16 +72,18 @@
    let settings
 </script>
 
-<div class="self-center flex flex-col gap-2 p-3">
-   <button class="action" disabled={!$deckValid && $autoMulligan} on:click={start} title="Shortcut: N">Setup</button>
-   <button class="action" on:click={resetBoard}>Reset</button>
+<div class="self-center flex flex-col gap-2 p-3 w-[170px]">
+   <button class="action" disabled={!$deckValid && $autoMulligan} on:click={setup} title="Shortcut: N">Setup</button>
+   <button class="action" on:click={reset}>Reset</button>
 
-   <div class="flex flex-col w-max rounded-lg border border-gray-400">
-      <button on:click={() => vstarUsed.set(!$vstarUsed)} class="p-2 rounded-t-lg" class:bg-yellow-200={$vstarUsed}>VSTAR Power</button>
+   <div class="flex flex-col rounded-lg border border-gray-400">
+      <button on:click={() => startTurn()} class="p-2 rounded-t-lg" title="Shortcut: C" >Turn <span class="font-bold">{$turn}</span></button>
+      <button on:click={() => vstarUsed.set(!$vstarUsed)} class="p-2" class:bg-yellow-200={$vstarUsed}>VSTAR Power</button>
       <button on:click={() => gxUsed.set(!$gxUsed)} class="p-2 rounded-b-lg" class:bg-yellow-200={$gxUsed}>GX Attack</button>
    </div>
 
    <button class="action" on:click={flipCoin} title="Shortcut: F">Flip Coin</button>
+   <button class="action" on:click={switchVisibility} title="Shortcut: Z">{$pokemonHidden ? 'Show' : 'Hide'} Pokémon</button>
    <button on:click|stopPropagation={() => settings.open()}>
       <Icon path={cog} />
    </button>

@@ -7,13 +7,14 @@
    import { share, publishLog } from '$lib/stores/connection.js'
 
    const { prizes, deck } = getContext('playBoard')
+   import { prizesFlipped } from '$lib/stores/player.js'
 
    let menu
-   let revealed = false
 
    function switchVisibility () {
-      revealed = !revealed
+      prizesFlipped.update(val => !val)
       menu.close()
+      share('prizeToggle', { flipped: prizesFlipped.get() })
    }
 
    function shuffle () {
@@ -34,20 +35,27 @@
       publishLog('Shuffled prizes into deck')
    }
 
+   const { openSelection } = getContext('boardActions')
+
+   function pickupPrizes () {
+      openSelection(prizes, $prizes.length)
+   }
+
 </script>
 
 <Pile pile={prizes} name="Prizes" bind:menu={menu}>
    <Vertical>
       <div class="p-1 grid grid-cols-2 gap-1 w-fit">
          {#each $prizes as card (card._id)}
-            <Card {card} pile={prizes} {revealed} />
+            <Card {card} pile={prizes} revealed={$prizesFlipped} />
          {/each}
       </div>
    </Vertical>
 
    <svelte:fragment slot="menu">
-      <ContextMenuOption click={switchVisibility} text={revealed ? 'Hide prizes' : 'Show prizes'} />
+      <ContextMenuOption click={switchVisibility} text={$prizesFlipped ? 'Hide prizes' : 'Show prizes'} />
       <ContextMenuOption click={shuffle} text="Shuffle" />
       <ContextMenuOption click={shuffleBack} text="Shuffle all into Deck" />
+      <ContextMenuOption click={pickupPrizes} text="Inspect Prizes" />
    </svelte:fragment>
 </Pile>

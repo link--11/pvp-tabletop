@@ -7,6 +7,7 @@ export const {
    cards, deck, hand, prizes, discard, lz,
    bench, active, stadium, table, pickup,
    vstarUsed, gxUsed,
+   prizesFlipped, handRevealed, pokemonHidden,
    reset
 } = board()
 
@@ -85,10 +86,17 @@ socket.on('boardState', ({ cards, board }) => {
 
    if (board.vstarUsed) vstarUsed.set(true)
    if (board.gxUsed) gxUsed.set(true)
+   if (board.pokemonHidden) pokemonHidden.set(true)
+   if (board.prizesFlipped) prizesFlipped.set(true)
+   if (board.handRevealed) handRevealed.set(true)
 })
 
 socket.on('deckLoaded', ({ deck }) => {
    reload(deck)
+})
+
+socket.on('boardReset', () => {
+   reset()
 })
 
 socket.on('cardsMoved', ({ cards, from, to }) => {
@@ -181,7 +189,19 @@ socket.on('stadiumPlayed', ({ cardId, from }) => {
    discardStadium()
 })
 
-/* */
+socket.on('pokemonToggle', ({ hidden }) => {
+   pokemonHidden.set(hidden)
+})
+
+socket.on('prizeToggle', ({ flipped }) => {
+   prizesFlipped.set(flipped)
+})
+
+socket.on('handToggle', ({ revealed }) => {
+   handRevealed.set(revealed)
+})
+
+/* helper */
 
 const slotRegex = /^([0-9a-z-]{36}).(pokemon|trainer|energy)$/i
 

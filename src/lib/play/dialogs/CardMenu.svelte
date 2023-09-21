@@ -8,13 +8,15 @@
 
    export let selection
 
-   $: heading = $selection.length === 1 ? $selection[0].name : `${$selection.length} cards`
-
    let pile
+   let revealed
    let menu
 
-   export function open (x, y, _pile) {
+   $: heading = $selection.length === 1 ? (revealed ? $selection[0].name : 'Hidden card') : `${$selection.length} cards`
+
+   export function open (x, y, _pile, _revealed) {
       pile = _pile
+      revealed = _revealed
       menu.open(x, y)
    }
 

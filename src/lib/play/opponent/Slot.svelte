@@ -1,7 +1,9 @@
 <script>
    import { getContext } from 'svelte'
    import { cardImage } from '$lib/util/assets.js'
+   import cardback from '$lib/assets/cardback_int.png'
 
+   import { pokemonHidden } from '$lib/stores/opponent.js'
    const { openOppSlotDetails } = getContext('boardActions')
 
    export let slot
@@ -12,15 +14,17 @@
 </script>
 
 <div class="slot relative w-max z-15" style="margin-right: {$energy.length * 25 + $trainer.length * 35}px"
-   on:click|stopPropagation={() => openOppSlotDetails(slot)}>
+   on:click|stopPropagation={() => !$pokemonHidden && openOppSlotDetails(slot)}>
 
    {#if $damage}
       <span class="counter absolute bottom-1 left-1 z-15 rounded-full p-4 bg-red-500 text-white font-bold flex justify-center items-center">{$damage}</span>
    {/if}
 
    {#if top}
-      <img src="{cardImage(top, 'xs')}" alt="{top.name}" draggable=false
-         class="card pokemon relative z-10">
+      <img
+         src="{$pokemonHidden ? cardback : cardImage(top, 'xs')}"
+         alt="{$pokemonHidden ? 'Hidden Pokémon' : top.name}"
+         class="card pokemon relative z-10" draggable=false>
    {/if}
 
    {#each $energy as nrg, i (nrg._id)}

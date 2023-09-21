@@ -11,10 +11,13 @@
 
    $: if (popup && $pickup.length === 0) popup.close()
 
-   let bottom = false // to know where where to "put back" the cards when closed
+   // to know where where to "put back" the cards when closed
+   let bottom = false
+   let origin
 
-   export function open (_bottom = false) {
+   export function open (_bottom = false, _origin = deck) {
       bottom = _bottom
+      origin = _origin
       popup.open()
    }
 
@@ -23,13 +26,13 @@
 
       while ($pickup.length) {
          const card = pickup.pop()
-         if (bottom) deck.unshift(card)
-         else deck.push(card)
+         if (bottom) origin.unshift(card)
+         else origin.push(card)
 
          cards.push(card._id)
       }
 
-      if (cards.length) share('cardsMoved', { cards, from: 'pickup', to: 'deck' })
+      if (cards.length) share('cardsMoved', { cards, from: 'pickup', to: origin.name })
    }
 
    function closeAndMove (pile) {
@@ -61,7 +64,9 @@
 
    <svelte:fragment slot="buttons">
       <button class="action" on:click={closeAndReturn}>Close</button>
-      <button class="action" on:click={closeAndShuffle}>Shuffle Back</button>
+      {#if (origin === deck)}
+         <button class="action" on:click={closeAndShuffle}>Shuffle Back</button>
+      {/if}
       <button class="action" on:click={() => closeAndMove(discard)}>Discard</button>
       <button class="action" on:click={() => closeAndMove(hand)}>To Hand</button>
       <button class="action" on:click={() => closeAndMove(lz)}>To LZ</button>

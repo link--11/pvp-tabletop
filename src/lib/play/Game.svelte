@@ -34,6 +34,8 @@
 
    function setup () {
       resetBoard()
+      turn.set(0)
+
       deck.shuffle()
       draw(7, true)
 
@@ -66,9 +68,14 @@
       setup()
    }
 
+   function startTurn () {
+      turn.update(n => n + 1)
+      draw()
+   }
+
    setContext('playActions', {
       deckValid,
-      resetBoard, startGame, draw
+      resetBoard, startGame, startTurn, draw
    })
 
 </script>

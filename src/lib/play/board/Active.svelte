@@ -3,7 +3,7 @@
    import Slot from './Slot.svelte'
 
    const { active } = getContext('playBoard')
-   const { toActive, slotSelection, cardSelection} = getContext('boardActions')
+   const { toActive, slotSelection, cardSelection } = getContext('boardActions')
 
    /* DnD */
 

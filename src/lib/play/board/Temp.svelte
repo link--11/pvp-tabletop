@@ -4,7 +4,7 @@
    import Pile from './Pile.svelte'
 
    const { table } = getContext('playBoard')
-   const { selectCard, resetSelection, cardSelection, openCardMenu } = getContext('boardActions')
+   const { selectPile, cardSelection, openCardMenu } = getContext('boardActions')
 
    $: top = $table[$table.length - 1]
 
@@ -16,10 +16,7 @@
    }
 
    function selectAll () {
-      resetSelection()
-      for (const card of $table) {
-         selectCard(card, table, true)
-      }
+      selectPile(table)
    }
 
    /* DnD */
