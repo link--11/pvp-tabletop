@@ -62,7 +62,8 @@ export function board () {
          pokemon: expPile(s.pokemon),
          energy: expPile(s.energy),
          trainer: expPile(s.trainer),
-         damage: s.damage.get()
+         damage: s.damage.get(),
+         marker: s.marker.get()
       })
 
       return {

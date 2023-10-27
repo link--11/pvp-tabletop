@@ -41,6 +41,7 @@
 
    import OppInspection from './dialogs/OppInspection.svelte'
    import OppSlotDetails from './dialogs/OppSlotDetails.svelte'
+   import OppSlotMenu from './dialogs/OppSlotMenu.svelte'
 
    let inspectionModal
    let selectionModal
@@ -52,6 +53,7 @@
 
    let oppInspectionModal
    let oppSlotModal
+   let oppSlotMenu
 
    function openPile (pile) {
       inspectionModal.open(pile)
@@ -88,7 +90,7 @@
       selectCard, selectSlot, selectPile,
       moveSelection, toBench, toActive, toStadium, removeSlot,
       attaching, evolving, startAttachEvolve, attachSelection,
-      resetSelection
+      resetSelection, toggleMarker
    } from '$lib/stores/player.js'
 
    function openCardMenu (x, y, revealed = true) {
@@ -97,6 +99,10 @@
 
    function openSlotMenu (x, y) {
       slotMenu.open(x, y)
+   }
+
+   function openOppSlotMenu (x, y, slot) {
+      oppSlotMenu.open(x, y, slot)
    }
 
    function startAE (evo = false) { // attach / evolve
@@ -111,7 +117,7 @@
       openSelection,
       openSlotDetails, openOppSlotDetails,
       openDetails, showMessage,
-      openCardMenu, openSlotMenu,
+      openCardMenu, openSlotMenu, openOppSlotMenu,
       cardSelection, slotSelection,
       selectCard, selectSlot, selectPile,
       moveSelection, resetSelection,
@@ -150,6 +156,7 @@
       else if (key === 'e') startAE(true)
 
       else if (key === 'v') openPile(deck)
+      else if (key === 'u') toggleMarker(deck)
 
       else if (key === 'x') {
          if ($cardSelection.length) moveSelection(table)
@@ -193,6 +200,7 @@
 
       <OppInspection bind:this={oppInspectionModal} />
       <OppSlotDetails bind:this={oppSlotModal} />
+      <OppSlotMenu bind:this={oppSlotMenu} />
 
       <div class="gameboard min-h-0 relative flex-1">
 

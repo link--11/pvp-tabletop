@@ -1,18 +1,24 @@
 <script>
    import Card from '../opponent/Card.svelte'
    import Popup from './Popup.svelte'
+   import { share } from '$lib/stores/connection.js'
 
    let popup
-   let pokemon, trainer, energy, damage
+   let id, pokemon, trainer, energy, damage
 
    $: if (!$pokemon?.length) popup?.close()
 
    export function open (slot) {
+      id = slot.id
       pokemon = slot.pokemon
       trainer = slot.trainer
       energy = slot.energy
       damage = slot.damage
       popup.open()
+   }
+
+   function updateDamage () {
+      share('oppDamageUpdated', { slotId: id, damage: damage.get() })
    }
 </script>
 
@@ -20,7 +26,13 @@
    <div class="w-fit m-auto">
       <div class="flex flex-col gap-2 items-center p-2">
          <span class="font-bold">{$pokemon[$pokemon.length - 1]?.name}</span>
-         <div class="bg-[rgba(255,255,255,0.6)] px-2 py-1 rounded-md">{$damage} Damage</div>
+         <div class="flex bg-[rgba(255,255,255,0.6)] rounded-md">
+            <input type="text" class="p-1 bg-white rounded-md border border-black w-20"
+               bind:value={$damage}
+               on:keydown={(e) => e.stopPropagation()}
+               on:change={updateDamage}>
+            <span class="p-2">Damage</span>
+         </div>
       </div>
 
       <div class="flex flex-col gap-2 p-3 items-center">

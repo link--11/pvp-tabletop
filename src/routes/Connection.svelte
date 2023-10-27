@@ -1,6 +1,7 @@
 <script>
    import Chat from './Chat.svelte'
-   import { room, createRoom, joinRoom, leaveRoom } from '$lib/stores/connection.js'
+   import Spinner from './Spinner.svelte'
+   import { connected, room, createRoom, joinRoom, leaveRoom } from '$lib/stores/connection.js'
 
    let roomId = ''
 
@@ -42,7 +43,14 @@
    {:else}
       <div class="flex flex-col gap-1 mb-5">
          <div class="text-center font-bold">
-            connected to
+            {#if $connected}
+               connected to
+            {:else}
+               <div class="flex gap-3 items-center justify-center bg-yellow-400 p-1 rounded-md mb-2">
+                  lost connection
+                  <Spinner />
+               </div>
+            {/if}
             <div class="text-sm text-gray-500">{$room}</div>
          </div>
 

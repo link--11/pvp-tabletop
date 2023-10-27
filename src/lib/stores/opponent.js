@@ -70,6 +70,7 @@ socket.on('boardState', ({ cards, board }) => {
       moveCards(data.energy, deck, p.energy)
       moveCards(data.trainer, deck, p.trainer)
       p.damage.set(data.damage)
+      p.marker.set(data.marker)
       return p
    }
 
@@ -175,6 +176,11 @@ socket.on('cardsAttached', ({ slotId, cards, from }) => {
 socket.on('damageUpdated', ({ slotId, damage }) => {
    const slot = findSlot(slotId)
    slot.damage.set(damage)
+})
+
+socket.on('markerUpdated', ({ slotId, state }) => {
+   const slot = findSlot(slotId)
+   slot.marker.set(state)
 })
 
 socket.on('slotDiscarded', ({ slotId }) => {

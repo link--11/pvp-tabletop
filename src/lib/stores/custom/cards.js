@@ -111,6 +111,7 @@ export function slot (card = null, id = null) {
       pokemon,
       energy: pile(`${sid}.energy`),
       trainer: pile(`${sid}.trainer`),
-      damage: writable(0)
+      damage: writable(0),
+      marker: writable(false)
    }
 }

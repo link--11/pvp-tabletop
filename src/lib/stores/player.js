@@ -2,7 +2,7 @@ import { get, post } from '$lib/util/fetch-web.js'
 import { board } from './custom/board.js'
 import { pile, slot } from './custom/cards.js'
 import { writable } from './custom/writable.js'
-import { share, publishLog } from './connection.js'
+import { share, react, publishLog } from './connection.js'
 import { s } from '$lib/util/strings.js'
 
 export const {
@@ -284,3 +284,23 @@ export function resetSelection () {
    attaching.set(false)
    evolving.set(false)
 }
+
+export function toggleMarker () {
+   if (!slotSelection.get().length) return
+   for (const slot of slotSelection.get()) {
+      slot.marker.update(b => !b)
+      share('markerUpdated', { slotId: slot.id, state: slot.marker.get() })
+   }
+}
+
+/* functions that let the opponent manipulate our board */
+
+const findSlot = (slotId) => {
+   if (active.get()?.id === slotId) return active.get()
+   else return bench.get().find(s => s.id === slotId)
+}
+
+react('oppDamageUpdated', ({ slotId, damage }) => {
+   const slot = findSlot(slotId)
+   slot.damage.set(damage)
+})

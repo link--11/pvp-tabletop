@@ -1,13 +1,11 @@
 const server = import.meta.env.VITE_PVP_SERVER
-const env = import.meta.env.VITE_ENV
 
 import { writable } from './custom/writable.js'
 import { cards, exportBoard } from './player.js'
 import { io } from 'socket.io-client'
 
 export let room = writable(null)
-
-let connected = false
+export let connected = writable(false)
 
 export const socket = io(server, {
    transports: [ 'websocket' ],
@@ -15,14 +13,23 @@ export const socket = io(server, {
 })
 
 socket.on('connect', () => {
-   connected = true
+   connected.set(true)
+   if (room.get()) { // re-join room when re-connection after disconnect
+      joinRoom(room.get())
+   }
+})
+
+socket.on('disconnect', () => {
+   connected.set(false)
 })
 
 function connect () {
-   if (!connected) {
+   if (!connected.get()) {
       socket.connect()
    }
 }
+
+/* Rooms */
 
 export function createRoom () {
    connect()
@@ -39,12 +46,27 @@ export function leaveRoom () {
    chat.set([])
 }
 
-export function share (event, data) {
-   if (env === 'dev') console.log('Sharing event ' + event, data)
-   socket.emit(event, {
-      ...data, room: room.get()
-   })
-}
+socket.on('createdRoom', ({ roomId }) => {
+   room.set(roomId)
+})
+
+socket.on('joinedRoom', ({ roomId }) => {
+   room.set(roomId)
+   shareBoardstate()
+})
+
+socket.on('leftRoom', () => {
+   room.set(null)
+})
+
+socket.on('opponentJoined', () => {
+   pushToChat('joined the room', 'important')
+   shareBoardstate()
+})
+
+socket.on('opponentLeft', () => {
+   pushToChat('left the room', 'important')
+})
 
 /* Chat / Log */
 
@@ -76,7 +98,15 @@ export function publishLog (message) {
    publishToChat(message, 'log')
 }
 
-/* */
+/* Game State */
+const env = import.meta.env.VITE_ENV
+
+export function share (event, data) {
+   if (env === 'dev') console.log('Sharing event ' + event, data)
+   socket.emit(event, {
+      ...data, room: room.get()
+   })
+}
 
 export function react (event, cb) {
    socket.on(event, cb)
@@ -90,28 +120,6 @@ export function shareBoardstate () {
    const deck = cards.get()
    if (deck) share('boardState', { cards: deck, board: exportBoard() })
 }
-
-socket.on('createdRoom', ({ roomId }) => {
-   room.set(roomId)
-})
-
-socket.on('joinedRoom', ({ roomId }) => {
-   room.set(roomId)
-   shareBoardstate()
-})
-
-socket.on('leftRoom', () => {
-   room.set(null)
-})
-
-socket.on('opponentJoined', () => {
-   pushToChat('joined the room', 'important')
-   shareBoardstate()
-})
-
-socket.on('opponentLeft', () => {
-   pushToChat('left the room', 'important')
-})
 
 if (env === 'dev') {
    socket.onAny((eventName, ...args) => {

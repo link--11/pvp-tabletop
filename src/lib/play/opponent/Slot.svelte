@@ -4,20 +4,29 @@
    import cardback from '$lib/assets/cardback_int.png'
 
    import { pokemonHidden } from '$lib/stores/opponent.js'
-   const { openOppSlotDetails } = getContext('boardActions')
+   const { openOppSlotDetails, openOppSlotMenu } = getContext('boardActions')
 
    export let slot
 
-   $: ({ pokemon, trainer, energy, damage } = slot)
+   function openMenu (e) {
+      openOppSlotMenu(e.clientX, e.clientY, slot)
+   }
+
+   $: ({ pokemon, trainer, energy, damage, marker } = slot)
 
    $: top = $pokemon[ $pokemon.length - 1]
 </script>
 
 <div class="slot relative w-max z-15" style="margin-right: {$energy.length * 25 + $trainer.length * 35}px"
-   on:click|stopPropagation={() => !$pokemonHidden && openOppSlotDetails(slot)}>
+   on:click|stopPropagation={() => !$pokemonHidden && openOppSlotDetails(slot)}
+   on:contextmenu|preventDefault={openMenu}>
 
    {#if $damage}
       <span class="counter absolute bottom-1 left-1 z-15 rounded-full p-4 bg-red-500 text-white font-bold flex justify-center items-center">{$damage}</span>
+   {/if}
+
+   {#if $marker}
+      <span class="counter absolute top-1 right-1 z-15 rounded-full p-4 bg-yellow-500 text-white font-bold flex justify-center items-center"></span>
    {/if}
 
    {#if top}

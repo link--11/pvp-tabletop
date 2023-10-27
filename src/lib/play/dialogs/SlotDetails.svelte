@@ -4,11 +4,12 @@
    import { share, publishLog } from '$lib/stores/connection.js'
 
    let popup
-   let pokemon, trainer, energy, damage
+   let id, pokemon, trainer, energy, damage
 
    $: if (!$pokemon?.length) popup?.close()
 
    export function open (slot) {
+      id = slot.id
       pokemon = slot.pokemon
       trainer = slot.trainer
       energy = slot.energy
@@ -17,21 +18,27 @@
    }
 
    function calcAttacks (pokes) {
-      if (!pokes) return []
-      const a = []
+      const a = { attacks: [], abilities: [] }
+      if (!pokes) return a
+
       for (const p of pokes.toReversed()) {
-         if (p.a1_name) a.push(p.a1_name)
-         if (p.a2_name) a.push(p.a2_name)
-         if (p.a3_name) a.push(p.a3_name)
+         if (p.a1_name) a.attacks.push(p.a1_name)
+         if (p.a2_name) a.attacks.push(p.a2_name)
+         if (p.a3_name) a.attacks.push(p.a3_name)
+         if (p.ability_name) a.abilities.push(p.ability_name)
       }
       return a
    }
 
-   $: attacks = calcAttacks($pokemon)
+   $: ({ attacks, abilities } = calcAttacks($pokemon))
 
-   function announceAttack (name) {
-      publishLog(`Attack: ${name}`)
+   function announce (message) {
+      publishLog(message)
       popup.close()
+   }
+
+   function updateDamage () {
+      share('damageUpdated', { slotId: id, damage: damage.get() })
    }
 </script>
 
@@ -39,20 +46,30 @@
    <div class="w-fit m-auto">
       <div class="flex flex-col gap-2 items-center p-2">
          <span class="font-bold">{$pokemon[$pokemon.length - 1]?.name}</span>
-         <div>
+         <div class="flex bg-[rgba(255,255,255,0.6)] rounded-md">
             <input type="text" class="p-1 bg-white rounded-md border border-black w-20"
-               bind:value={$damage} on:keydown={(e) => e.stopPropagation()}>
-            Damage
+               bind:value={$damage}
+               on:keydown={(e) => e.stopPropagation()}
+               on:change={updateDamage}>
+            <span class="p-2">Damage</span>
          </div>
       </div>
 
-      <div class="flex gap-2 justify-center mt-2 mb-2">
-         {#each attacks as attack}
-            <button class="attack primary" on:click={() => announceAttack(attack)}>{attack}</button>
-         {/each}
-      </div>
+      <flex class="flex flex-col gap-2 m-2 items-center">
+         <div class="flex gap-2">
+            {#each attacks as attack}
+               <button class="attack primary" on:click={() => announce(`Attack: ${attack}`)}>{attack}</button>
+            {/each}
+         </div>
 
-      <div class="flex flex-col gap-2 p-3 items-center">
+         <div class="flex gap-2">
+            {#each abilities as ability}
+               <button class="attack primary" on:click={() => announce(`Ability: ${ability}`)}>{ability}</button>
+            {/each}
+         </div>
+      </flex>
+
+      <div class="flex flex-col gap-4 p-3 items-center">
          <div class="flex gap-2">
             {#each $pokemon as card (card._id)}
                <Card {card} pile={pokemon} />

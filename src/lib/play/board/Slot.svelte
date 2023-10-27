@@ -12,7 +12,7 @@
 
    export let slot
 
-   $: ({ pokemon, trainer, energy, damage } = slot)
+   $: ({ pokemon, trainer, energy, damage, marker } = slot)
    $: if (!$pokemon.length) {
       // discard the slot if it contains no pokemon (they can be moved away through the details view)
       discard.merge([ ...$trainer, ...$energy ])
@@ -26,14 +26,6 @@
    }
 
    $: top = $pokemon[ $pokemon.length - 1]
-
-   onMount(() => {
-      const unsub = slot.damage.subscribe(value => {
-         share('damageUpdated', { slotId: slot.id, damage: value })
-      })
-
-      return unsub
-   })
 
    /* DnD */
 
@@ -98,6 +90,10 @@
 
    {#if $damage}
       <span class="counter absolute bottom-1 left-1 z-15 rounded-full p-4 bg-red-500 text-white font-bold flex justify-center items-center">{$damage}</span>
+   {/if}
+
+   {#if $marker}
+      <span class="counter absolute top-1 right-1 z-15 rounded-full p-4 bg-yellow-500 text-white font-bold flex justify-center items-center"></span>
    {/if}
 
    {#if top}

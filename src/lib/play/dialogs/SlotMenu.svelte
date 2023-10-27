@@ -4,6 +4,8 @@
    import ContextMenuOption from '$lib/components/ContextMenuOption.svelte'
    import { share } from '$lib/stores/connection.js'
 
+   import { toggleMarker } from '$lib/stores/player.js'
+
    const { hand, discard, active } = getContext('playBoard')
    const { openSlotDetails, moveSelection, toActive, toBench, removeSlot } = getContext('boardActions')
 
@@ -14,7 +16,7 @@
 
    let menu
 
-   export function open (x, y,) {
+   export function open (x, y) {
       menu.open(x, y)
    }
 
@@ -34,6 +36,7 @@
       const dmg = e.altKey ? 50 : 10
       for (const slot of $selection) {
          slot.damage.update(before => Number(before) + dmg)
+         share('damageUpdated', { slotId: slot.id, damage: slot.damage.get() })
       }
    }
 
@@ -48,6 +51,8 @@
          else slot.damage.set(before - dmg)
 
          if (before > dmg) dmgLeft = true
+
+         share('damageUpdated', { slotId: slot.id, damage: slot.damage.get() })
       }
 
       if (!dmgLeft) menu.close()
@@ -57,6 +62,7 @@
       let x = Number(prompt('How much damage is on the Pokémon?'))
       for (const slot of $selection) {
          slot.damage.set(x)
+         share('damageUpdated', { slotId: slot.id, damage: x })
       }
    }
 
@@ -100,6 +106,7 @@
    <ContextMenuOption click={damage} text="Damage" />
    <ContextMenuOption click={heal} text="Heal" />
    <ContextMenuOption click={setDamage} text="Set Damage" />
+   <ContextMenuOption click={() => toggleMarker()} text="Toggle Marker" shortcut="u" />
    <hr>
    {#if $selection.length === 1 && $selection[0] !== $active}
       <ContextMenuOption click={() => callThenClose(toActive)} text="Move to Active" shortcut="a" />
