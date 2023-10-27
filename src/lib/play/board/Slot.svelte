@@ -1,5 +1,5 @@
 <script>
-   import { onDestroy, getContext } from 'svelte'
+   import { onMount, getContext } from 'svelte'
    import { cardImage } from '$lib/util/assets.js'
    import { share } from '$lib/stores/connection.js'
 
@@ -27,10 +27,13 @@
 
    $: top = $pokemon[ $pokemon.length - 1]
 
-   const unsub = slot.damage.subscribe(value => {
-      share('damageUpdated', { slotId: slot.id, damage: value })
-	})
-	onDestroy(unsub)
+   onMount(() => {
+      const unsub = slot.damage.subscribe(value => {
+         share('damageUpdated', { slotId: slot.id, damage: value })
+      })
+
+      return unsub
+   })
 
    /* DnD */
 

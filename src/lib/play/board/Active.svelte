@@ -28,7 +28,9 @@
 <div use:dnd={dndConfig}>
    <div class="h-full flex justify-center items-center">
       {#if $active}
-         <Slot bind:slot={$active} />
+         {#key $active.id}
+            <Slot bind:slot={$active} />
+         {/key}
       {/if}
    </div>
 </div>
