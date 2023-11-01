@@ -1,11 +1,10 @@
 <script>
-   import { getContext } from 'svelte'
    import ContextMenu from '$lib/components/ContextMenu.svelte'
    import { ctrlA } from '$lib/actions/customEvents.js'
    import { down } from '$lib/icons/paths.js'
    import Icon from '$lib/components/Icon.svelte'
 
-   const { selectCard, resetSelection, moveSelection } = getContext('boardActions')
+   import { selectCard, resetSelection, moveSelection } from '$lib/stores/player.js'
 
    export let pile
    export let name = null
@@ -63,7 +62,7 @@
 
 <style>
    .count {
-      background-color: rgba(255, 255, 255, 0.5);
+      background-color: var(--overlay-color);
       @apply absolute z-10 top-1 left-1 font-bold p-1 cursor-pointer rounded-md;
    }
 

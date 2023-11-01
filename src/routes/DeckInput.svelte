@@ -34,7 +34,7 @@
 </script>
 
 {#if isOpen}
-   <div class="fixed z-20 h-screen w-[50vw] max-w-[750px] min-w-[300px] bg-gray-300 shadow-lg shadow-dark-400" transition:slide={{ axis: 'x' }}>
+   <div class="fixed z-20 h-screen w-[50vw] max-w-[750px] min-w-[300px] bg-[var(--bg-color-two)] shadow-lg shadow-dark-400" transition:slide={{ axis: 'x' }}>
 
       <div class="flex flex-col h-full">
          <button class="self-start bg-blue-500 !rounded-none !rounded-br-md !p-3" on:click={() => isOpen = false}>Close</button>

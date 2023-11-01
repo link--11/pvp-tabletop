@@ -90,6 +90,11 @@
       display: grid;
       border: 1px solid #0003;
       box-shadow: 2px 2px 5px 0px #0002;
-      background: var(--bg-color);
+      background: var(--ctx-menu-color);
+   }
+
+   :global(hr) {
+      border-color: var(--bg-color-three);
+      background-color: var(--bg-color-three);
    }
 </style>

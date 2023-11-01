@@ -6,7 +6,8 @@
    import { dragging } from '$lib/dnd/pointer.js'
    import cardback from '$lib/assets/cardback_int.png'
 
-   const { cardSelection: selection, selectCard, openDetails, openCardMenu } = getContext('boardActions')
+   import { cardSelection as selection, selectCard } from '$lib/stores/player.js'
+   const { openDetails, openCardMenu } = getContext('boardActions')
 
    export let card
    export let pile
@@ -67,6 +68,7 @@
 
 <style>
    .selected {
-      @apply border-blue-500;
+      @apply border-[var(--selection-color)];
+      --shadow-color: transparent;
    }
 </style>

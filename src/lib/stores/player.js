@@ -16,6 +16,8 @@ export const {
 export function importDeck (txt, cb, rd = false) {
    const callback = (res) => {
       cards.set(res.cards)
+      reset()
+
       cb(res)
       share('deckLoaded', { deck: res.cards })
       publishLog(rd ? 'random deck ⚆ _ ⚆' : 'Imported deck')
@@ -159,14 +161,18 @@ export function toBench () {
    if (cardSelection.get().length) {
       const ids = []
 
+      const from = selectionPile === 'stadium' ? 'stadium' : selectionPile.name
+
       for (const card of cardSelection.get()) {
-         selectionPile.remove(card)
+         if (from === 'stadium') stadium.set(null)
+         else selectionPile.remove(card)
+
          const s = slot(card)
          bench.add(s)
          ids.push({ cardId: card._id, slotId: s.id })
       }
 
-      share('cardsBenched', { cards: ids, from: selectionPile.name })
+      share('cardsBenched', { cards: ids, from })
 
    } else {
 
@@ -189,7 +195,11 @@ export function toActive () {
       if (cs.length !== 1) return
       const card = cs[0]
 
-      selectionPile.remove(card)
+      const from = selectionPile === 'stadium' ? 'stadium' : selectionPile.name
+
+      if (from === 'stadium') stadium.set(null)
+      else selectionPile.remove(card)
+
       if (active.get()) {
          // move the current active out of the way
          bench.add(active.get())
@@ -197,7 +207,7 @@ export function toActive () {
       const s = slot(card)
       active.set(s)
 
-      share('cardPromoted', { cardId: card._id, slotId: s.id, from: selectionPile.name })
+      share('cardPromoted', { cardId: card._id, slotId: s.id, from })
 
    } else {
       if (slotSelection.get().length !== 1) return

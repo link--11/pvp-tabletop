@@ -5,7 +5,7 @@
    import Pile from './Pile.svelte'
    import { share, publishLog } from '$lib/stores/connection.js'
 
-   const { discard, deck } = getContext('playBoard')
+   import { discard, deck } from '$lib/stores/player.js'
    const { openPile } = getContext('boardActions')
 
    let menu

@@ -1,13 +1,11 @@
 <script>
-   import { getContext } from 'svelte'
    import ContextMenuOption from '$lib/components/ContextMenuOption.svelte'
    import Horizontal from '$lib/components/scroll/Horizontal.svelte'
    import Pile from './Pile.svelte'
    import Card from './Card.svelte'
    import { share, publishLog } from '$lib/stores/connection.js'
 
-   const { hand, deck, discard } = getContext('playBoard')
-   import { handRevealed } from '$lib/stores/player.js'
+   import { hand, deck, discard, handRevealed } from '$lib/stores/player.js'
 
    let menu
 

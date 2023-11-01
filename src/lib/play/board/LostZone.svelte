@@ -4,7 +4,7 @@
    import ContextMenuOption from '$lib/components/ContextMenuOption.svelte'
    import Pile from './Pile.svelte'
 
-   const { lz } = getContext('playBoard')
+   import { lz } from '$lib/stores/player.js'
    const { openPile } = getContext('boardActions')
 
    let menu

@@ -1,10 +1,8 @@
 <script>
-   import { getContext } from 'svelte'
    import Slot from './Slot.svelte'
    import { ctrlA } from '$lib/actions/customEvents.js'
 
-   const { active, bench } = getContext('playBoard')
-   const { toBench, resetSelection, selectSlot } = getContext('boardActions')
+   import { active, bench, toBench, resetSelection, selectSlot } from '$lib/stores/player.js'
 
    /* DnD */
 
@@ -31,8 +29,8 @@
 
 </script>
 
-<div class="p-1 focus:outline-none" use:dnd={dndConfig} tabindex="0" use:ctrlA on:ctrlA={selectAll}>
-   <div class="flex gap-4">
+<div class="p-1 flex items-center focus:outline-none" use:dnd={dndConfig} tabindex="0" use:ctrlA on:ctrlA={selectAll}>
+   <div class="flex gap-[var(--scaled-rem)] min-w-0">
       {#each $bench as slot (slot.id)}
          <Slot bind:slot={slot} />
       {/each}

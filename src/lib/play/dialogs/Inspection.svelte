@@ -1,9 +1,8 @@
 <script>
-   import { getContext } from 'svelte'
    import Card from '../board/Card.svelte'
    import Popup from './Popup.svelte'
 
-   const { deck } = getContext('playBoard')
+   import { deck } from '$lib/stores/player.js'
 
    let pile = null
    let popup

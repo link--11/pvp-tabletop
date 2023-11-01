@@ -1,10 +1,8 @@
 <script>
-   import { getContext } from 'svelte'
    import Card from './Card.svelte'
    import { dragging } from '$lib/dnd/pointer.js'
 
-   const { stadium } = getContext('playBoard')
-   const { toStadium, cardSelection: selection } = getContext('boardActions')
+   import { stadium, toStadium, cardSelection as selection } from '$lib/stores/player.js'
 
    /* DnD */
 

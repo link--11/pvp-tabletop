@@ -1,14 +1,14 @@
 <script>
-   import { onMount, getContext } from 'svelte'
+   import { getContext } from 'svelte'
    import { cardImage } from '$lib/util/assets.js'
    import { share } from '$lib/stores/connection.js'
 
-   const { discard } = getContext('playBoard')
-   const {
-      openSlotDetails,
-      slotSelection: selection, selectSlot, removeSlot, openSlotMenu,
+   import {
+      discard, slotSelection as selection, selectSlot, removeSlot,
       attaching, evolving, attachSelection, cardSelection
-   } = getContext('boardActions')
+   } from '$lib/stores/player.js'
+
+   const { openSlotDetails, openSlotMenu, openDetails } = getContext('boardActions')
 
    export let slot
 
@@ -67,6 +67,7 @@
    function onClick (e) {
       e.stopPropagation()
       if ($attaching || $evolving) attachSelection(slot)
+      else if (e.altKey) openDetails(top)
       else selectSlot(slot, e.ctrlKey)
    }
 
@@ -81,7 +82,7 @@
    }
 </script>
 
-<div class="slot relative w-max z-15" style="margin-right: {$energy.length * 25 + $trainer.length * 35}px"
+<div class="slot relative w-max z-15" style="margin-right: calc({$energy.length * 25 + $trainer.length * 35}px * var(--card-scale))"
    class:dragged={$dragging && $selection.includes(slot)}
    on:click={onClick}
    on:contextmenu={onCtx}
@@ -106,12 +107,12 @@
 
    {#each $energy as nrg, i (nrg._id)}
       <img src="{cardImage(nrg, 'xs')}" alt="{nrg.name}" class="card absolute" draggable=false
-         style="bottom: 15px; left: {(i + 1)* 25}px; z-index: {9 - i}">
+         style="bottom: calc(17px * var(--card-scale)); left: calc({(i + 1)* 25}px * var(--card-scale)); z-index: {9 - i}">
    {/each}
 
    {#each $trainer as tool, i (tool._id)}
       <img src="{cardImage(tool, 'xs')}" alt="{tool.name}" class="card absolute" draggable=false
-         style="bottom: 30px; left: {$energy.length * 25 + (i + 1) * 35}px; z-index: {9 - i - $energy.length}">
+         style="bottom: calc(34px * var(--card-scale)); left: calc({$energy.length * 25 + (i + 1) * 35}px * var(--card-scale)); z-index: {9 - i - $energy.length}">
    {/each}
 </div>
 
@@ -121,7 +122,7 @@
    }
 
    img.card.selected {
-      @apply border-yellow-400;
+      @apply border-[var(--selection-color)];
    }
 
    .target {
@@ -141,7 +142,7 @@
    }
 
    .counter {
-      width: calc(var(--card-width) / 2.5);
-      height: calc(var(--card-width) / 2.5);
+      width: calc(calc(var(--card-width) * var(--card-scale)) / 2.5);
+      height: calc(calc(var(--card-width) * var(--card-scale)) / 2.5);
    }
 </style>

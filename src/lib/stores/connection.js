@@ -6,6 +6,7 @@ import { io } from 'socket.io-client'
 
 export let room = writable(null)
 export let connected = writable(false)
+export let chat = writable([])
 
 export const socket = io(server, {
    transports: [ 'websocket' ],
@@ -70,8 +71,6 @@ socket.on('opponentLeft', () => {
 
 /* Chat / Log */
 
-export let chat = writable([])
-
 function updateChat (message, type, self) {
    chat.update(history => {
       history.push({
@@ -85,7 +84,7 @@ function updateChat (message, type, self) {
 }
 
 export function publishToChat (message, type) {
-   if (!connected) return
+   if (!room.val) return
    updateChat(message, type, 1)
    share('chatMessage', { message, type })
 }

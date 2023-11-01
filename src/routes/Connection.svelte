@@ -31,7 +31,7 @@
          <hr>
          <form class="flex flex-col gap-2" on:submit|preventDefault={() => joinRoom(roomId)}>
             <input
-               class="p-2 border border-light-900 rounded-lg"
+               class="p-2 border border-[var(--bg-color-three)] rounded-lg"
                type="text" name="roomId" bind:value={roomId} placeholder="Room ID" on:keydown|stopPropagation
                required
             >
@@ -46,12 +46,12 @@
             {#if $connected}
                connected to
             {:else}
-               <div class="flex gap-3 items-center justify-center bg-yellow-400 p-1 rounded-md mb-2">
+               <div class="flex gap-3 items-center justify-center bg-yellow-400 text-black p-1 rounded-md mb-2">
                   lost connection
                   <Spinner />
                </div>
             {/if}
-            <div class="text-sm text-gray-500">{$room}</div>
+            <div class="text-sm text-[var(--text-color-two)]">{$room}</div>
          </div>
 
          <button

@@ -1,11 +1,9 @@
 <script>
-   import { getContext } from 'svelte'
    import Card from '../board/Card.svelte'
    import Popup from './Popup.svelte'
    import { share } from '$lib/stores/connection.js'
 
-   const { deck, discard, hand, lz } = getContext('playBoard')
-   import { pickup } from '$lib/stores/player.js'
+   import { deck, discard, hand, lz, pickup } from '$lib/stores/player.js'
 
    let popup
 

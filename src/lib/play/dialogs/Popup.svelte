@@ -52,7 +52,7 @@
 </script>
 
 {#if isOpen}
-   <div class="absolute top-0 left-0 right-0 m-8 z-20 bg-[rgba(123,123,123,0.6)] rounded-md border border-black"
+   <div class="absolute top-0 left-0 right-0 m-8 z-20 bg-[var(--popup-color)] rounded-md border border-black"
       use:clickOutside on:outclick={closed}
       use:escape on:esc={closed}>
 

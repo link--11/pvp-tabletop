@@ -16,7 +16,7 @@
 <style>
    .count {
       transform: scale(-1, -1); /* "unscale" the number */
-      background-color: rgba(255, 255, 255, 0.5);
+      background-color: var(--overlay-color);
       @apply absolute z-10 top-1 left-1 font-bold p-1 rounded-md;
    }
 </style>

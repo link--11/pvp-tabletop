@@ -3,8 +3,12 @@
    import ContextMenu from '$lib/components/ContextMenu.svelte'
    import ContextMenuOption from '$lib/components/ContextMenuOption.svelte'
 
-   const { hand, discard, deck, prizes, lz, table } = getContext('playBoard')
-   const { openDetails, moveSelection, toActive, toBench, toStadium, startAE } = getContext('boardActions')
+   import {
+      hand, discard, deck, prizes, lz, table,
+      moveSelection, toActive, toBench, toStadium
+   } from '$lib/stores/player.js'
+
+   const { openDetails, startAE } = getContext('boardActions')
 
    export let selection
 

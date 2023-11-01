@@ -1,7 +1,7 @@
 import { writable as coreWritable } from 'svelte/store'
 
 /**
- * Writable store with get() method
+ * writable store with get() method
  */
 export function writable (init) {
    let value = init
@@ -18,6 +18,7 @@ export function writable (init) {
          set2(updater(value))
       },
       get: () => value,
+      get val() { return value },
       subscribe
    }
 }

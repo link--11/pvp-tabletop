@@ -4,7 +4,6 @@
    import ContextMenuOption from '$lib/components/ContextMenuOption.svelte'
 
    import { share } from '$lib/stores/connection.js'
-   import { pokemonHidden } from '$lib/stores/opponent.js'
    const { openOppSlotDetails } = getContext('boardActions')
 
    let slot
@@ -25,7 +24,7 @@
 
    $: if (slot) ({ pokemon } = slot)
    $: top = $pokemon ? $pokemon[ $pokemon.length - 1] : null
-   $: heading = $pokemonHidden ? 'Hidden Pokémon' : top?.name
+   $: heading = top?.name
 </script>
 
 <ContextMenu bind:this={menu} {heading}>

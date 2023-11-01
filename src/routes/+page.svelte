@@ -1,7 +1,13 @@
 <script>
-   import Game from '$lib/play/Game.svelte'
+   import { browser } from '$app/environment'
+   import { darkMode } from '$lib/stores/settings.js'
+   import Board from '$lib/play/Board.svelte'
    import Connection from './Connection.svelte'
    import DeckInput from './DeckInput.svelte'
+
+   $: if (browser) {
+      document.documentElement.classList.toggle('dark', $darkMode)
+   }
 </script>
 
 <svelte:head>
@@ -12,7 +18,7 @@
 
 <DeckInput />
 
-<div class="flex bg-gray-100">
-   <Game />
+<div class="flex">
+   <Board />
    <Connection />
 </div>

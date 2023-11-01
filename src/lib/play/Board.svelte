@@ -1,5 +1,5 @@
 <script>
-   import { getContext, setContext, onMount } from 'svelte'
+   import { setContext, onMount } from 'svelte'
    import { dragging } from '$lib/dnd/pointer.js'
    import { pick, pokemonHidden, handRevealed } from '$lib/stores/player.js'
 
@@ -26,11 +26,6 @@
    import OppStadium from './opponent/Stadium.svelte'
    import OppTable from './opponent/Temp.svelte'
 
-   const { draw } = getContext('playActions')
-   const { hand, deck, discard, prizes, lz, table } = getContext('playBoard')
-
-   /* Conditional Windows */
-
    import Inspection from './dialogs/Inspection.svelte'
    import Selection from './dialogs/Selection.svelte'
    import SlotDetails from './dialogs/SlotDetails.svelte'
@@ -42,6 +37,15 @@
    import OppInspection from './dialogs/OppInspection.svelte'
    import OppSlotDetails from './dialogs/OppSlotDetails.svelte'
    import OppSlotMenu from './dialogs/OppSlotMenu.svelte'
+
+   import {
+      hand, deck, discard, prizes, lz, table,
+      draw,
+      cardSelection, slotSelection, selectionPile, selectPile,
+      moveSelection, toBench, toActive, toStadium,
+      startAttachEvolve,
+      resetSelection, toggleMarker
+   } from '$lib/stores/player.js'
 
    let inspectionModal
    let selectionModal
@@ -84,15 +88,6 @@
       messageAlert.show(message)
    }
 
-   /* Selections and actions on them */
-
-   import { cardSelection, slotSelection, selectionPile,
-      selectCard, selectSlot, selectPile,
-      moveSelection, toBench, toActive, toStadium, removeSlot,
-      attaching, evolving, startAttachEvolve, attachSelection,
-      resetSelection, toggleMarker
-   } from '$lib/stores/player.js'
-
    function openCardMenu (x, y, revealed = true) {
       cardMenu.open(x, y, selectionPile, revealed)
    }
@@ -118,13 +113,7 @@
       openSlotDetails, openOppSlotDetails,
       openDetails, showMessage,
       openCardMenu, openSlotMenu, openOppSlotMenu,
-      cardSelection, slotSelection,
-      selectCard, selectSlot, selectPile,
-      moveSelection, resetSelection,
-      toBench, toActive, toStadium,
-      removeSlot,
-      attaching, evolving,
-      startAE, attachSelection
+      startAE
    })
 
    /* Keyboard shortcuts */
@@ -174,21 +163,21 @@
    onMount(() => {
       document.addEventListener('keydown', keydown)
       document.addEventListener('click', resetSelection)
+
       return () => {
          document.removeEventListener('keydown', keydown)
          document.removeEventListener('click', resetSelection)
       }
    })
 
-   let game // the dom element, for setting css variables on it
 </script>
 
 <DndCard />
 
-<Controls {game} />
+<Controls />
 
-<div class="h-screen bg-gray-100 overflow-y-auto flex-1">
-   <div class="game flex flex-col h-full max-w-[1920px] m-auto select-none relative" bind:this={game}>
+<div class="h-screen overflow-y-auto flex-1">
+   <div class="game flex flex-col h-full max-w-[1920px] m-auto select-none relative">
 
       <CardMenu bind:this={cardMenu} selection={cardSelection} />
       <SlotMenu bind:this={slotMenu} selection={slotSelection} />
@@ -204,31 +193,31 @@
 
       <div class="gameboard min-h-0 relative flex-1">
 
-         <div class="hand2">
+         <div class="hand2 flip">
             <OppHand />
          </div>
 
-         <div class="prizes2">
+         <div class="prizes2 flip">
             <OppPrizes />
          </div>
 
-         <div class="deck2">
+         <div class="deck2 flip">
             <OppDeck />
          </div>
 
-         <div class="discard2">
+         <div class="discard2 flip">
             <OppDiscard />
          </div>
 
-         <div class="lz2">
+         <div class="lz2 flip">
             <OppLostZone />
          </div>
 
-         <div class="bench2">
+         <div class="bench2 flip">
             <OppBench />
          </div>
 
-         <div class="play2">
+         <div class="play2 flip">
             <OppTable />
          </div>
 
@@ -236,7 +225,7 @@
             <Table />
          </div>
 
-         <div class="stadium2">
+         <div class="stadium2 flip">
             <OppStadium />
          </div>
 
@@ -245,7 +234,7 @@
          </div>
 
          <div class="active">
-            <div class="active2">
+            <div class="active2 flip">
                <OppActive />
             </div>
             <div class="active1">
@@ -287,7 +276,7 @@
 
 <style>
    :global(.dragover) {
-      @apply bg-green-100;
+      background: rgba(187, 247, 208, 0.5);
    }
 
    :global(.dragged) {
@@ -295,13 +284,11 @@
    }
 
    .game {
-      --card-width: 100px;
-      --card-height: 140px;
+      --card-width: 105px;
+      --card-height: 145px;
    }
 
    .game :global(img.card) {
-      width: var(--card-width);
-      height: auto;
       filter: drop-shadow(1px 1px 2px var(--shadow-color));
    }
 
@@ -316,7 +303,7 @@
          "prizes prizes stadium active play deck lz"
          "prizes prizes bench bench bench discard ."
          "hand hand hand hand hand hand hand";
-      column-gap: 1rem;
+      column-gap: var(--scaled-rem);
    }
 
    /* https://css-tricks.com/preventing-a-grid-blowout/ */
@@ -397,7 +384,7 @@
    }
 
    .hand.revealed {
-      @apply bg-yellow-50;
+      background: rgba(254, 249, 195, 0.5);
    }
 
    .play {
@@ -407,47 +394,43 @@
 
    .prizes2 {
       grid-area: prizes2;
-      transform: scale(-1, -1);
-   }
-
-   .active2 {
-      transform: scale(-1, -1);
    }
 
    .bench2 {
       grid-area: bench2;
-      transform: scale(-1, -1);
    }
 
    .lz2 {
       grid-area: lz2;
-      transform: scale(-1, -1);
    }
 
    .deck2 {
       grid-area: deck2;
-      transform: scale(-1, -1);
    }
 
    .discard2 {
       grid-area: discard2;
-      transform: scale(-1, -1);
    }
 
    .hand2 {
       grid-area: hand2;
       border-top: 2px solid var(--text-color);
-      transform: scale(-1, -1);
    }
 
    .play2 {
       grid-area: play;
-      transform: scale(-1, -1);
    }
 
    .stadium2 {
       grid-area: stadium;
+   }
+
+   .flip {
       transform: scale(-1, -1);
+   }
+
+   .flip :global(img.card) {
+      filter: drop-shadow(-1px -1px 2px var(--shadow-color));
    }
 
    .veil {

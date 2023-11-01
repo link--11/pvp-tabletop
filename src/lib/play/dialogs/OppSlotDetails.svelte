@@ -27,11 +27,11 @@
       <div class="flex flex-col gap-2 items-center p-2">
          <span class="font-bold">{$pokemon[$pokemon.length - 1]?.name}</span>
          <div class="flex bg-[rgba(255,255,255,0.6)] rounded-md">
-            <input type="text" class="p-1 bg-white rounded-md border border-black w-20"
+            <input type="text" class="p-1 rounded-md border border-black w-20"
                bind:value={$damage}
                on:keydown={(e) => e.stopPropagation()}
                on:change={updateDamage}>
-            <span class="p-2">Damage</span>
+            <span class="p-2 text-black">Damage</span>
          </div>
       </div>
 

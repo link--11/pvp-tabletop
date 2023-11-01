@@ -1,9 +1,7 @@
 <script>
-   import { getContext } from 'svelte'
    import Slot from './Slot.svelte'
 
-   const { active } = getContext('playBoard')
-   const { toActive, slotSelection, cardSelection } = getContext('boardActions')
+   import { active, toActive, slotSelection, cardSelection } from '$lib/stores/player.js'
 
    /* DnD */
 

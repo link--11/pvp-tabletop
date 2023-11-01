@@ -5,8 +5,7 @@
    import cardback from '$lib/assets/cardback_int.png'
    import { share } from '$lib/stores/connection.js'
 
-   const { deck, discard, lz, prizes } = getContext('playBoard')
-   const { draw } = getContext('playActions')
+   import { deck, discard, lz, prizes, draw } from '$lib/stores/player.js'
    const { openPile, openSelection } = getContext('boardActions')
 
    let menu

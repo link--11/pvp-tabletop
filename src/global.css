@@ -1,22 +1,62 @@
+/* https://tailwindcss.com/docs/customizing-colors */
+
 :root {
    --primary-color: #1ca492;
-   --text-color: #222222;
-   --bg-color: #ffffff;
-
-   --panel-color: #F5F5F5;
-   --panel-color-two: #EBEBEB;
-   --panel-color-three: #E0E0E0;
-
+   --text-color: #171717;
+   --text-color-two: #525252;
+   --bg-color: #e5e7eb;
+   --bg-color-two: #d1d5db;
+   --bg-color-three: #9ca3af;
+   --bg-color-zero: #f9fafb;
+   --input-color: var(--bg-color-zero);
+   --ctx-menu-color: var(--bg-color);
+   --popup-color: rgba(123,123,123,0.6);
+   --overlay-color: rgba(255,255,255,0.6);
    --shadow-color: rgb(160, 160, 160);
+   --selection-color: #3b82f6;
+   --message-color: #ea580c;
 
+   --card-width: 136px;
+   --card-height: 139px;
+   --card-scale: 1;
+   --scaled-rem: calc(1rem * var(--card-scale))
+}
+
+:root.dark {
+   --primary-color: #1ca492;
+   --text-color: #f5f5f5;
+   --text-color-two: #a3a3a3;
+   --bg-color: #1f2937;
+   --bg-color-two: #374151;
+   --bg-color-three: #4b5563;
+   --bg-color-zero: #111827;
+   --input-color: var(--bg-color-three);
+   --ctx-menu-color: var(--bg-color-two);
+   --popup-color: rgba(123,123,123,0.6);
+   --overlay-color: rgba(120,120,120,0.6);
+   --shadow-color: rgb(22, 22, 22);
+   --selection-color: #f5d0fe;
+   --message-color: #facc15;
+}
+
+body {
    color: var(--text-color);
    background-color: var(--bg-color);
 }
 
-.w-fit {
-   width: fit-content;
+input[type="text"], textarea {
+   background-color: var(--input-color);
+}
+
+img.card {
+   width: calc(var(--card-width) * var(--card-scale));
+   height: auto;
 }
 
 .primary {
    @apply bg-[var(--primary-color)] text-white;
+}
+
+.w-fit { /* tailwind class, but isn't included in the used WindiCSS version */
+   width: fit-content;
 }

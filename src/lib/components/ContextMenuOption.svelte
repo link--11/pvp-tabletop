@@ -20,7 +20,7 @@
       <div class="flex justify-between gap-2">
          {text}
          {#if shortcut}
-            <span class="text-gray-600">{shortcut}</span>
+            <span class="text-[var(--text-color-two)]">{shortcut}</span>
          {/if}
       </div>
    {:else}

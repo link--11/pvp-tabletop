@@ -6,8 +6,7 @@
    import Card from './Card.svelte'
    import { share, publishLog } from '$lib/stores/connection.js'
 
-   const { prizes, deck } = getContext('playBoard')
-   import { prizesFlipped } from '$lib/stores/player.js'
+   import { prizes, deck, prizesFlipped } from '$lib/stores/player.js'
 
    let menu
 
@@ -45,7 +44,7 @@
 
 <Pile pile={prizes} name="Prizes" bind:menu={menu}>
    <Vertical>
-      <div class="p-1 grid grid-cols-2 gap-1 w-fit">
+      <div class="prizes p-1 grid grid-cols-2 gap-1 w-fit">
          {#each $prizes as card (card._id)}
             <Card {card} pile={prizes} revealed={$prizesFlipped} />
          {/each}
@@ -59,3 +58,10 @@
       <ContextMenuOption click={pickupPrizes} text="Inspect Prizes" />
    </svelte:fragment>
 </Pile>
+
+<style>
+   .prizes {
+      --card-width: 95px;
+      --card-height: 132px;
+   }
+</style>

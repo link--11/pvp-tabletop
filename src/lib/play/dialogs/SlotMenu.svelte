@@ -4,10 +4,13 @@
    import ContextMenuOption from '$lib/components/ContextMenuOption.svelte'
    import { share } from '$lib/stores/connection.js'
 
-   import { toggleMarker } from '$lib/stores/player.js'
+   import {
+      hand, discard, active,
+      moveSelection, toActive, toBench, removeSlot,
+      toggleMarker
+   } from '$lib/stores/player.js'
 
-   const { hand, discard, active } = getContext('playBoard')
-   const { openSlotDetails, moveSelection, toActive, toBench, removeSlot } = getContext('boardActions')
+   const { openSlotDetails } = getContext('boardActions')
 
    export let selection
 

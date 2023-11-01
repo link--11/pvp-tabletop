@@ -3,8 +3,8 @@
    import { cardImage } from '$lib/util/assets.js'
    import Pile from './Pile.svelte'
 
-   const { table } = getContext('playBoard')
-   const { selectPile, cardSelection, openCardMenu } = getContext('boardActions')
+   import { table, selectPile, cardSelection } from '$lib/stores/player.js'
+   const { openCardMenu } = getContext('boardActions')
 
    $: top = $table[$table.length - 1]
 
@@ -81,7 +81,7 @@
 
 <style>
    .selected {
-      --drop-shadow-color: rgba(59, 130, 246);
-      filter: drop-shadow(0px 0px 5px var(--drop-shadow-color)) !important;
+      --drop-shadow-color: #fbbf24;
+      filter: drop-shadow(0px 0px 10px var(--drop-shadow-color)) !important;
    }
 </style>

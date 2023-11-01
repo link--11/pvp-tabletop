@@ -4,29 +4,69 @@
    import { share, publishLog, shareBoardstate } from '$lib/stores/connection.js'
    import { cog } from '$lib/icons/paths.js'
    import Icon from '$lib/components/Icon.svelte'
+   import Settings from './dialogs/Settings.svelte'
 
-   import { pokemonHidden } from '$lib/stores/player.js'
-   const { deckValid, resetBoard, startGame, startTurn } = getContext('playActions')
-   const { turn, vstarUsed, gxUsed } = getContext('playStats')
+   import {
+      cards, deck, hand, prizes, draw,
+      vstarUsed, gxUsed, pokemonHidden,
+      reset as resetBoard
+   } from '$lib/stores/player.js'
+
    const { showMessage } = getContext('boardActions')
 
-   export let game // reference to the top level dom element
+   /* Game Flow */
+   let turn = 0
 
-   // game is undefined initially before the this bindings are set up
-   $: if (game) {
-      const bs = getComputedStyle(game)
-      initialWidth = parseInt(bs.getPropertyValue('--card-width'))
+   function hasBasic (cards) {
+      for (const card of cards) {
+         if (card.stage === 'basic') return true
+      }
+      return false
    }
 
-   let initialWidth
-   let scale = 1.0
+   $: deckValid = hasBasic($cards)
 
-   $: game?.style.setProperty('--card-width', initialWidth * scale + 'px')
+   function draw7andPutPrizes () {
+      resetBoard()
+
+      deck.shuffle()
+      draw(7, true)
+
+      for (let i = 0; i < 6; i++) {
+         const card = deck.pop()
+         if (card) prizes.push(card)
+      }
+   }
+
+   function setupBoard () {
+
+      if ($autoMulligan) {
+         let mulligans = 0
+         let hasBasic = false
+
+         while (!hasBasic) {
+            draw7andPutPrizes()
+
+            for (const card of $hand) {
+               if (card.stage === 'basic') hasBasic = true
+            }
+
+            if (!hasBasic) mulligans++
+         }
+
+         return mulligans
+      }
+
+      // else
+      draw7andPutPrizes()
+   }
 
    function setup () {
-      if (!$deckValid && $autoMulligan) return
-      const mulligans = startGame()
+      if (!deckValid && $autoMulligan) return
+      const mulligans = setupBoard()
       if ($autoMulligan) showMessage(`${mulligans} Mulligans`)
+
+      turn = 0
 
       publishLog('Setup' + ($autoMulligan ? ` - ${mulligans} Mulligans` : ''))
       shareBoardstate()
@@ -34,10 +74,17 @@
 
    function reset () {
       resetBoard()
-      turn.set(0)
+      turn = 0
 
       share('boardReset')
    }
+
+   function startTurn () {
+      turn++
+      draw()
+   }
+
+   /* Misc. Actions */
 
    function flipCoin () {
       const heads = Math.floor(Math.random() * 2)
@@ -50,11 +97,13 @@
       share('pokemonToggle', { hidden: pokemonHidden.get() })
    }
 
+   /* Keyboard shortcuts */
+
    function keydown (e) {
       const key = e.key.toLowerCase()
 
       if (key === 'n') {
-         if (window.confirm('Start new game?')) start()
+         if (window.confirm('Start new game?')) setup()
       }
       else if (key === 'c') startTurn()
       else if (key === 'f') flipCoin()
@@ -68,18 +117,17 @@
       }
    })
 
-   import Settings from './dialogs/Settings.svelte'
-   let settings
+   let settings // DOM element binding
 </script>
 
 <div class="self-center flex flex-col gap-2 p-3 w-[170px]">
-   <button class="action" disabled={!$deckValid && $autoMulligan} on:click={setup} title="Shortcut: N">Setup</button>
+   <button class="action" disabled={!deckValid && $autoMulligan} on:click={setup} title="Shortcut: N">Setup</button>
    <button class="action" on:click={reset}>Reset</button>
 
    <div class="flex flex-col rounded-lg border border-gray-400">
-      <button on:click={() => startTurn()} class="p-2 rounded-t-lg" title="Shortcut: C" >Turn <span class="font-bold">{$turn}</span></button>
-      <button on:click={() => vstarUsed.set(!$vstarUsed)} class="p-2" class:bg-yellow-200={$vstarUsed}>VSTAR Power</button>
-      <button on:click={() => gxUsed.set(!$gxUsed)} class="p-2 rounded-b-lg" class:bg-yellow-200={$gxUsed}>GX Attack</button>
+      <button on:click={() => startTurn()} class="p-2 rounded-t-lg" title="Shortcut: C" >Turn <span class="font-bold">{turn}</span></button>
+      <button on:click={() => vstarUsed.set(!$vstarUsed)} class="toggle p-2" class:on={$vstarUsed}>VSTAR Power</button>
+      <button on:click={() => gxUsed.set(!$gxUsed)} class="toggle p-2 rounded-b-lg" class:on={$gxUsed}>GX Attack</button>
    </div>
 
    <button class="action" on:click={flipCoin} title="Shortcut: F">Flip Coin</button>
@@ -89,7 +137,7 @@
    </button>
 </div>
 
-<Settings bind:this={settings} bind:scale={scale} />
+<Settings bind:this={settings} />
 
 <style>
    button.action {
@@ -98,5 +146,9 @@
 
    button.action:disabled {
       @apply font-normal cursor-default border-gray-500 text-gray-600 bg-gray-100;
+   }
+
+   button.toggle.on {
+      background-color: rgba(254, 240, 138, 0.6);
    }
 </style>
