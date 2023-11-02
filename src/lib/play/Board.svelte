@@ -1,7 +1,7 @@
 <script>
    import { setContext, onMount } from 'svelte'
    import { dragging } from '$lib/dnd/pointer.js'
-   import { pick, pokemonHidden, handRevealed } from '$lib/stores/player.js'
+   import { pick, shuffle, pokemonHidden, handRevealed } from '$lib/stores/player.js'
 
    import Hand from './board/Hand.svelte'
    import Deck from './board/Deck.svelte'
@@ -133,13 +133,11 @@
 
       else if (key === 's') {
          if ($cardSelection.length || $slotSelection.length) moveSelection(deck, { shuffle: true })
-         else deck.shuffle()
+         else shuffle()
       }
 
       else if (key === 't') moveSelection(deck)
       else if (key === 'm') moveSelection(deck, { bottom: true })
-
-      else if (key === 'w') moveSelection(table)
 
       else if (key === 'q') startAE(false)
       else if (key === 'e') startAE(true)
@@ -147,6 +145,7 @@
       else if (key === 'v') openPile(deck)
       else if (key === 'u') toggleMarker(deck)
 
+      else if (key === 'w') moveSelection(table) // older version table shortcut without the extra functionality
       else if (key === 'x') {
          if ($cardSelection.length) moveSelection(table)
          else if ($table.length) {

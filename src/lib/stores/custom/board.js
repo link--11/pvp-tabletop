@@ -90,6 +90,11 @@ export function board () {
       bench, active, stadium, table, pickup,
       vstarUsed, gxUsed,
       prizesFlipped, handRevealed, pokemonHidden,
-      exportBoard, reset
+      exportBoard, reset,
+      // utility function used in multiple files
+      findSlot: (slotId) => {
+         if (active.get()?.id === slotId) return active.get()
+         else return bench.get().find(s => s.id === slotId)
+      }
    }
 }

@@ -19,11 +19,16 @@
       share('cardsMoved', { cards, from: 'hand', to: targetPile.name })
    }
 
+   function discardAll () {
+      moveAll(discard)
+      publishLog('Discarded Hand')
+   }
+
    function shuffleBack () {
       moveAll(deck)
       deck.shuffle()
 
-      publishLog(`Shuffled hand into deck`)
+      publishLog('Shuffled Hand into Deck')
    }
 
    function marnie () {
@@ -37,7 +42,7 @@
       menu.close()
 
       share('cardsMoved', { cards, from: 'hand', to: 'deck' }) // order of opponents cards does not matter
-      publishLog(`Shuffled hand to bottom of deck`)
+      publishLog('Shuffled Hand to bottom of Deck')
    }
 
    function discardRandom () {
@@ -47,7 +52,7 @@
       discard.push(card)
 
       share('cardsMoved', { cards: [ card._id ], from: 'hand', to: 'discard' })
-      publishLog(`Randomly discarded ${card.name}`)
+      publishLog(`Randomly discarded [${card.name}] from Hand`)
    }
 
    function switchVisibility () {
@@ -67,10 +72,10 @@
    </Horizontal>
 
    <svelte:fragment slot="menu">
-      <ContextMenuOption click={() => moveAll(discard)} text="Discard all" />
-      <ContextMenuOption click={() => shuffleBack()} text="Shuffle all into Deck" />
-      <ContextMenuOption click={() => marnie()} text="Shuffle all to bottom of Deck" />
+      <ContextMenuOption click={() => discardAll()} text="Discard All" />
+      <ContextMenuOption click={() => shuffleBack()} text="Shuffle All Into Deck" />
+      <ContextMenuOption click={() => marnie()} text="Shuffle All to Bottom of Deck" />
       <ContextMenuOption click={() => discardRandom()} text="Discard Random Card" />
-      <ContextMenuOption click={switchVisibility} text={$handRevealed ? 'Hide hand' : 'Reveal hand'} />
+      <ContextMenuOption click={switchVisibility} text={$handRevealed ? 'Hide Hand' : 'Reveal Hand'} />
    </svelte:fragment>
 </Pile>

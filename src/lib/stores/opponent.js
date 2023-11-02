@@ -8,7 +8,7 @@ export const {
    bench, active, stadium, table, pickup,
    vstarUsed, gxUsed,
    prizesFlipped, handRevealed, pokemonHidden,
-   reset
+   reset, findSlot
 } = board()
 
 const reload = (deck) => {
@@ -34,11 +34,6 @@ const moveCards = (ids, source, target) => {
       const card = removeCard(id, source)
       target.push(card)
    }
-}
-
-const findSlot = (slotId) => {
-   if (active.get()?.id === slotId) return active.get()
-   else return bench.get().find(s => s.id === slotId)
 }
 
 const removeSlot = (slot) => {

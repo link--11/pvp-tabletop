@@ -1,7 +1,7 @@
 <script>
    import { getContext, onMount } from 'svelte'
    import { autoMulligan } from '$lib/stores/settings.js'
-   import { share, publishLog, shareBoardstate } from '$lib/stores/connection.js'
+   import { share, publishLog } from '$lib/stores/connection.js'
    import { cog } from '$lib/icons/paths.js'
    import Icon from '$lib/components/Icon.svelte'
    import Settings from './dialogs/Settings.svelte'
@@ -9,7 +9,8 @@
    import {
       cards, deck, hand, prizes, draw,
       vstarUsed, gxUsed, pokemonHidden,
-      reset as resetBoard
+      reset as resetBoard,
+      shareBoardstate
    } from '$lib/stores/player.js'
 
    const { showMessage } = getContext('boardActions')
@@ -77,6 +78,7 @@
       turn = 0
 
       share('boardReset')
+      publishLog('Reset')
    }
 
    function startTurn () {

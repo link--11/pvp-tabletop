@@ -1,9 +1,11 @@
 <script>
    import Card from '../board/Card.svelte'
    import Popup from './Popup.svelte'
-   import { share } from '$lib/stores/connection.js'
+   import { ctrlA } from '$lib/actions/customEvents.js'
+   import { share, publishLog } from '$lib/stores/connection.js'
+   import { logMove } from '$lib/stores/logger.js'
 
-   import { deck, discard, hand, lz, pickup } from '$lib/stores/player.js'
+   import { deck, discard, hand, lz, pickup, shuffle, selectPile } from '$lib/stores/player.js'
 
    let popup
 
@@ -30,16 +32,20 @@
          cards.push(card._id)
       }
 
-      if (cards.length) share('cardsMoved', { cards, from: 'pickup', to: origin.name })
+      if (cards.length) {
+         share('cardsMoved', { cards, from: 'pickup', to: origin.name })
+         publishLog('Put back the remaining cards')
+      }
    }
 
    function closeAndMove (pile) {
-      const cards = $pickup.map(card => card._id)
+      const cards = $pickup.slice()
       popup.close()
       pile.merge($pickup)
       pickup.clear()
 
-      share('cardsMoved', { cards, from: 'pickup', to: pile.name })
+      share('cardsMoved', { cards: cards.map(card => card._id), from: 'pickup', to: pile.name })
+      logMove(cards, 'pickup', pile.name)
    }
 
    function closeAndReturn () {
@@ -49,12 +55,14 @@
 
    function closeAndShuffle () {
       closeAndMove(deck)
-      deck.shuffle()
+      shuffle()
    }
 </script>
 
 <Popup bind:this={popup} on:closed={putBack}>
-   <div class="flex flex-wrap gap-1 p-2 inspection">
+   <div class="flex flex-wrap gap-1 p-2 focus:outline-none inspection"
+      tabindex="0" use:ctrlA on:ctrlA={() => selectPile(pickup)}>
+
       {#each $pickup as card (card._id)}
          <Card {card} pile={pickup} />
       {/each}

@@ -19,7 +19,7 @@
    function shuffle () {
       prizes.shuffle()
       menu.close()
-      publishLog('Shuffled prizes')
+      publishLog('Shuffled Prizes')
    }
 
    function shuffleBack () {
@@ -31,7 +31,7 @@
       deck.shuffle()
 
       share('cardsMoved', { cards, from: 'prizes', to: 'deck' })
-      publishLog('Shuffled prizes into deck')
+      publishLog('Shuffled Prizes into Deck')
    }
 
    const { openSelection } = getContext('boardActions')
@@ -52,9 +52,9 @@
    </Vertical>
 
    <svelte:fragment slot="menu">
-      <ContextMenuOption click={switchVisibility} text={$prizesFlipped ? 'Hide prizes' : 'Show prizes'} />
+      <ContextMenuOption click={switchVisibility} text={$prizesFlipped ? 'Hide Prizes' : 'Show Prizes'} />
       <ContextMenuOption click={shuffle} text="Shuffle" />
-      <ContextMenuOption click={shuffleBack} text="Shuffle all into Deck" />
+      <ContextMenuOption click={shuffleBack} text="Shuffle All Into Deck" />
       <ContextMenuOption click={pickupPrizes} text="Inspect Prizes" />
    </svelte:fragment>
 </Pile>

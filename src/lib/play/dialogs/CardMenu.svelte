@@ -55,9 +55,9 @@
    {/if}
 
    {#if pile !== deck}
-      <ContextMenuOption click={() => moveTo(deck, { shuffle: true })} text="Shuffle into Deck" shortcut="s" />
-      <ContextMenuOption click={() => moveTo(deck)} text="To top of Deck" shortcut="t" />
-      <ContextMenuOption click={() => moveTo(deck, { bottom: true })} text="To bottom of Deck" shortcut="m" />
+      <ContextMenuOption click={() => moveTo(deck, { shuffle: true })} text="Shuffle Into Deck" shortcut="s" />
+      <ContextMenuOption click={() => moveTo(deck)} text="To Top of Deck" shortcut="t" />
+      <ContextMenuOption click={() => moveTo(deck, { bottom: true })} text="To Bottom of Deck" shortcut="m" />
    {/if}
 
    {#if pile !== lz}
@@ -67,7 +67,7 @@
       <ContextMenuOption click={() => moveTo(prizes)} text="To Prizes" shortcut="p" />
    {/if}
    {#if pile !== table}
-      <ContextMenuOption click={() => moveTo(table)} text="To Table" shortcut="w" />
+      <ContextMenuOption click={() => moveTo(table)} text="To Table" shortcut="x" />
    {/if}
 
    <ContextMenuOption click={() => attachEvolve()} text="Attach" shortcut="q" />
@@ -75,7 +75,7 @@
 
    {#if $selection.length === 1}
       {#if $deck.length && pile !== deck}
-         <ContextMenuOption click={() => moveTo(deck, { switch: true })} text="Switch with top of Deck" />
+         <ContextMenuOption click={() => moveTo(deck, { switch: true })} text="Switch With Top of Deck" />
       {/if}
       <ContextMenuOption click={() => openDetails($selection[0])} text="Show Details" />
    {/if}

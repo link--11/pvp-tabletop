@@ -15,6 +15,24 @@ export function clickOutside (node, capture = false) {
    }
 }
 
+/** softer version of clickOutside, fire as soon as a click or drag is started */
+export function mousedownOutside (node, capture = false) {
+
+   const click = (event) => {
+      if (!node.contains(event.target)) {
+         node.dispatchEvent(new CustomEvent('outclick'))
+      }
+   }
+
+   document.addEventListener('mousedown', click, capture)
+
+   return {
+      destroy () {
+         document.removeEventListener('mousedown', click, capture)
+      }
+   }
+}
+
 export function escape (node) {
 
    const keydown = (e) => {

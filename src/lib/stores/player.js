@@ -4,13 +4,18 @@ import { pile, slot } from './custom/cards.js'
 import { writable } from './custom/writable.js'
 import { share, react, publishLog } from './connection.js'
 import { s } from '$lib/util/strings.js'
+import {
+   logMove, logSlotMove, logPickup,
+   logBenched, logPromoted, logStadium,
+   logAttachment, logEvolve
+} from './logger.js'
 
 export const {
    cards, deck, hand, prizes, discard, lz,
    bench, active, stadium, table, pickup,
    vstarUsed, gxUsed,
    prizesFlipped, handRevealed, pokemonHidden,
-   reset, exportBoard
+   reset, exportBoard, findSlot
 } = board()
 
 export function importDeck (txt, cb, rd = false) {
@@ -55,7 +60,12 @@ export function pick (source, count, options = {}) {
    }
 
    share('cardsMoved', { cards, from: source.name, to: 'pickup' })
-   publishLog(`Looking at ${count} ${s('card', count)} from ${options.bottom ? 'bottom of ' : ''}${source.name}`)
+   logPickup(count, source.name, options)
+}
+
+export function shuffle () {
+   deck.shuffle()
+   publishLog('Shuffled Deck')
 }
 
 export let cardSelection = pile()
@@ -88,10 +98,12 @@ export function selectSlot (slot, push = false) {
 }
 
 /** move the selection to a "pile"  */
+
 export function moveSelection (pile, options = {}) {
 
    if (cardSelection.get().length) {
       if (selectionPile === pile) return
+      if (selectionPile.get && !selectionPile.get().length) return // user cleared the pile with a shortcut while dragging cards from there, which are now not in there anymore
 
       const ids = []
       const swapIds = []
@@ -134,7 +146,9 @@ export function moveSelection (pile, options = {}) {
          else share('cardsMoved', { cards: swapIds, from: pile.name, to: from })
       }
 
-   } else {
+      logMove(cardSelection.get(), from, pile.name, options)
+
+   } else if (slotSelection.get().length) {
       const ids = []
 
       for (const slot of slotSelection.get()) {
@@ -151,6 +165,7 @@ export function moveSelection (pile, options = {}) {
       }
 
       share('slotsMoved', { slots: ids, to: pile.name })
+      logSlotMove(slotSelection.get(), pile.name, options)
    }
 
    if (options.shuffle) pile.shuffle()
@@ -159,6 +174,8 @@ export function moveSelection (pile, options = {}) {
 
 export function toBench () {
    if (cardSelection.get().length) {
+      if (selectionPile.get && !selectionPile.get().length) return // see moveSelection
+
       const ids = []
 
       const from = selectionPile === 'stadium' ? 'stadium' : selectionPile.name
@@ -173,8 +190,9 @@ export function toBench () {
       }
 
       share('cardsBenched', { cards: ids, from })
+      logBenched(cardSelection.get(), from)
 
-   } else {
+   } else if (slotSelection.get().length) {
 
       for (const slot of slotSelection.get()) {
          if (active.get() === slot) {
@@ -193,6 +211,8 @@ export function toActive () {
    const cs = cardSelection.get()
    if (cs.length) {
       if (cs.length !== 1) return
+      if (selectionPile.get && !selectionPile.get().length) return // see moveSelection
+
       const card = cs[0]
 
       const from = selectionPile === 'stadium' ? 'stadium' : selectionPile.name
@@ -208,6 +228,7 @@ export function toActive () {
       active.set(s)
 
       share('cardPromoted', { cardId: card._id, slotId: s.id, from })
+      logPromoted(card, from)
 
    } else {
       if (slotSelection.get().length !== 1) return
@@ -221,6 +242,7 @@ export function toActive () {
       active.set(slot)
 
       share('slotPromoted', { slotId: slot.id })
+      publishLog(`Moved {${slot.name}} into the Active Spot`)
    }
 
    resetSelection()
@@ -236,7 +258,7 @@ export function discardStadium () {
 }
 
 export function toStadium () {
-   if (cardSelection.get().length !== 1 || selectionPile === 'stadium') return
+   if (cardSelection.get().length !== 1 || selectionPile === 'stadium' || !selectionPile.get().length) return
    const card = cardSelection.get()[0]
 
    selectionPile.remove(card)
@@ -245,6 +267,7 @@ export function toStadium () {
    stadium.set(card)
 
    share('stadiumPlayed', { cardId: card._id, from: selectionPile.name })
+   logStadium(card, selectionPile.name)
 
    resetSelection()
 }
@@ -265,9 +288,13 @@ export function startAttachEvolve (evo = false) {
 }
 
 export function attachSelection (slot) {
+   if (!cardSelection.get().length) return
+
    const ids = []
+   const from = selectionPile === 'stadium' ? 'stadium' : selectionPile.name
+
    for (const card of cardSelection.get()) {
-      if (selectionPile === 'stadium') stadium.set(null)
+      if (from === 'stadium') stadium.set(null)
       else selectionPile.remove(card)
 
       ids.push(card._id)
@@ -279,8 +306,11 @@ export function attachSelection (slot) {
 
    share(
       evolving.get() ? 'cardsEvolved' : 'cardsAttached',
-      { slotId: slot.id, cards: ids, from: selectionPile.name }
+      { slotId: slot.id, cards: ids, from }
    )
+
+   if (evolving.get()) logEvolve(slot, cardSelection.get(), from)
+   else logAttachment(slot, cardSelection.get(), from)
 
    resetSelection()
 }
@@ -303,12 +333,22 @@ export function toggleMarker () {
    }
 }
 
-/* functions that let the opponent manipulate our board */
+/* full board sharing */
 
-const findSlot = (slotId) => {
-   if (active.get()?.id === slotId) return active.get()
-   else return bench.get().find(s => s.id === slotId)
+export function shareBoardstate () {
+   const deck = cards.get()
+   if (deck) share('boardState', { cards: deck, board: exportBoard() })
 }
+
+react('joinedRoom', () => {
+   shareBoardstate()
+})
+
+react('opponentJoined', () => {
+   shareBoardstate()
+})
+
+/* functions that let the opponent manipulate our board */
 
 react('oppDamageUpdated', ({ slotId, damage }) => {
    const slot = findSlot(slotId)

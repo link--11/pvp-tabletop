@@ -4,7 +4,7 @@
    import { down } from '$lib/icons/paths.js'
    import Icon from '$lib/components/Icon.svelte'
 
-   import { selectCard, resetSelection, moveSelection } from '$lib/stores/player.js'
+   import { selectPile, moveSelection } from '$lib/stores/player.js'
 
    export let pile
    export let name = null
@@ -26,13 +26,6 @@
       allowDrop
    }
 
-   function selectAll () {
-      resetSelection()
-      for (const card of $pile) {
-         selectCard(card, pile, true)
-      }
-   }
-
    let heading
    function openMenu () {
       const rect = heading.getBoundingClientRect()
@@ -43,7 +36,7 @@
 
 <div class="pile p-1 rounded flex flex-col focus:outline-none relative" tabindex="0"
    on:contextmenu|preventDefault={(e) => menu.open(e.clientX, e.clientY)}
-   use:ctrlA on:ctrlA={selectAll}
+   use:ctrlA on:ctrlA={() => selectPile(pile)}
    use:dnd={dndConfig}>
 
    {#if name}

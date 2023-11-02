@@ -20,7 +20,7 @@
       deck.shuffle()
 
       share('cardsMoved', { cards, from: 'discard', to: 'deck' })
-      publishLog(`Shuffled discard into deck`)
+      publishLog('Shuffled Discard into Deck')
    }
 </script>
 
@@ -31,6 +31,6 @@
 
    <svelte:fragment slot="menu">
       <ContextMenuOption click={() => openPile(discard)} text="View All" />
-      <ContextMenuOption click={() => shuffleBack()} text="Shuffle all into Deck" />
+      <ContextMenuOption click={() => shuffleBack()} text="Shuffle All Into Deck" />
    </svelte:fragment>
 </Pile>

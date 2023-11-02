@@ -9,7 +9,7 @@
    --bg-color-three: #9ca3af;
    --bg-color-zero: #f9fafb;
    --input-color: var(--bg-color-zero);
-   --ctx-menu-color: var(--bg-color);
+   --ctx-menu-color: var(--bg-color-zero);
    --popup-color: rgba(123,123,123,0.6);
    --overlay-color: rgba(255,255,255,0.6);
    --shadow-color: rgb(160, 160, 160);

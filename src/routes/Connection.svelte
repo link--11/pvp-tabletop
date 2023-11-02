@@ -22,7 +22,7 @@
    }
 </script>
 
-<div class="p-4 w-[350px] flex flex-col h-screen">
+<div class="p-4 min-w-[350px] w-[min(20%,500px)] flex flex-col h-screen">
    {#if !$room}
       <div class="text-center mb-4 italic font-bold">not connected</div>
 

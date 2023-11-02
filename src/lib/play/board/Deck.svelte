@@ -4,8 +4,9 @@
    import Pile from './Pile.svelte'
    import cardback from '$lib/assets/cardback_int.png'
    import { share } from '$lib/stores/connection.js'
+   import { logMove } from '$lib/stores/logger.js'
 
-   import { deck, discard, lz, prizes, draw } from '$lib/stores/player.js'
+   import { deck, discard, lz, prizes, draw, shuffle } from '$lib/stores/player.js'
    const { openPile, openSelection } = getContext('boardActions')
 
    let menu
@@ -20,6 +21,7 @@
       if (card) {
          targetPile.push(card)
          share('cardsMoved', { cards: [ card._id ], from: 'deck', to: targetPile.name })
+         logMove([ card ], 'deck', targetPile.name, { top: true })
       }
    }
 
@@ -39,7 +41,7 @@
    {/if}
 
    <svelte:fragment slot="menu">
-      <ContextMenuOption click={() => deck.shuffle()} text="Shuffle" shortcut="s" />
+      <ContextMenuOption click={() => shuffle()} text="Shuffle" shortcut="s" />
       <ContextMenuOption click={() => draw()} text="Draw" shortcut="1" />
       <ContextMenuOption click={() => drawX()} text="Draw X" shortcut="1...9" />
       <ContextMenuOption click={() => openPile(deck)} text="View All" shortcut="v" />

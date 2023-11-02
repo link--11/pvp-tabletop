@@ -68,6 +68,7 @@
       e.stopPropagation()
       if ($attaching || $evolving) attachSelection(slot)
       else if (e.altKey) openDetails(top)
+      else if (e.shiftKey) openSlotDetails(slot)
       else selectSlot(slot, e.ctrlKey)
    }
 

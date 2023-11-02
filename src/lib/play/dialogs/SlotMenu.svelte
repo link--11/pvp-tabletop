@@ -3,6 +3,7 @@
    import ContextMenu from '$lib/components/ContextMenu.svelte'
    import ContextMenuOption from '$lib/components/ContextMenuOption.svelte'
    import { share } from '$lib/stores/connection.js'
+   import { logMove } from '$lib/stores/logger.js'
 
    import {
       hand, discard, active,
@@ -78,7 +79,6 @@
          hand.merge(pokemon)
          discard.merge(energy)
          discard.merge(trainer)
-
          removeSlot(slot)
 
          share('cardsMoved', { cards: pokemon.map(card => card._id), from: slot.pokemon.name, to: 'hand' })
@@ -86,6 +86,11 @@
          share('cardsMoved', { cards: trainer.map(card => card._id), from: slot.trainer.name, to: 'discard' })
 
          share('slotDiscarded', { slotId: slot.id })
+
+         if (trainer.length || energy.length) {
+            logMove([ ...trainer, ...energy ], slot.name, 'discard')
+         }
+         logMove(pokemon, 'play', 'hand')
       }
 
       menu.close()
@@ -93,12 +98,13 @@
 
    function discardEnergy () {
       for (const slot of $selection) {
-         const cards = slot.energy.get().map(card => card._id)
+         const cards = slot.energy.get().slice()
 
          discard.merge(slot.energy.get())
          slot.energy.clear()
 
-         share('cardsMoved', { cards, from: slot.energy.name, to: 'discard' })
+         share('cardsMoved', { cards: cards.map(card => card._id), from: slot.energy.name, to: 'discard' })
+         logMove(cards, slot.energy.name, 'discard')
       }
       menu.close()
    }
@@ -118,10 +124,10 @@
       <ContextMenuOption click={() => callThenClose(toBench)} text="Move to Bench" shortcut="b" />
    {/if}
 
-   <ContextMenuOption click={() => moveTo(discard)} text="Discard all" shortcut="d" />
+   <ContextMenuOption click={() => moveTo(discard)} text="Discard All" shortcut="d" />
    <ContextMenuOption click={() => moveTo(hand)} text="Return to Hand" shortcut="h" />
    <ContextMenuOption click={() => returnPokemon()} text="Return Pokémon, Discard Rest" />
-   <ContextMenuOption click={() => discardEnergy()} text="Discard all Energy" />
+   <ContextMenuOption click={() => discardEnergy()} text="Discard All Energy" />
 
    {#if $selection.length === 1}
       <hr>

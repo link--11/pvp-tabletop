@@ -9,7 +9,7 @@
 
 <script>
    import { onMount } from 'svelte'
-   import { clickOutside, escape } from '$lib/actions/customEvents.js'
+   import { mousedownOutside, escape } from '$lib/actions/customEvents.js'
 
    let element
    const j = i++
@@ -73,7 +73,7 @@
 {#if isOpen}
    <div bind:this={element} style="top: {y}px; left: {x}px;" class="z-25"
       on:click={(e) => e.stopPropagation()}
-      use:clickOutside={true} on:outclick={close}
+      use:mousedownOutside={true} on:outclick={close}
       use:escape on:esc={close}>
 
       {#if heading}

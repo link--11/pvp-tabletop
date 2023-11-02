@@ -64,13 +64,7 @@ export function pile (name = null) {
             v.splice(v.indexOf(rem), 1, add)
             return v
          })
-      },
-      // removeById: (id) => {
-      //    update(v => {
-      //       v.splice(v.findIndex(card => card._id === id), 1)
-      //       return v
-      //    })
-      // }
+      }
    }
 }
 
@@ -112,6 +106,9 @@ export function slot (card = null, id = null) {
       energy: pile(`${sid}.energy`),
       trainer: pile(`${sid}.trainer`),
       damage: writable(0),
-      marker: writable(false)
+      marker: writable(false),
+      get name() {
+         return pokemon.get().at(-1)?.name
+      }
    }
 }

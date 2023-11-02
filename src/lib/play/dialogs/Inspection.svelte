@@ -1,8 +1,9 @@
 <script>
+   import { ctrlA } from '$lib/actions/customEvents.js'
    import Card from '../board/Card.svelte'
    import Popup from './Popup.svelte'
 
-   import { deck } from '$lib/stores/player.js'
+   import { deck, shuffle, selectPile } from '$lib/stores/player.js'
 
    let pile = null
    let popup
@@ -23,7 +24,7 @@
 
    function closeAndShuffle () {
       popup.close()
-      deck.shuffle()
+      shuffle()
    }
 </script>
 
@@ -32,7 +33,9 @@
       <button class="flex-1 tab rounded-tl-md" class:active={view === 'natural'} on:click={() => view = 'natural'}>Natural</button>
       <button class="flex-1 tab rounded-tr-md" class:active={view === 'sorted'} on:click={() => view = 'sorted'}>Sorted</button>
    </div>
-   <div class="flex flex-wrap gap-1 p-2 inspection">
+   <div class="flex flex-wrap gap-1 p-2 focus:outline-none inspection"
+      tabindex="0" use:ctrlA on:ctrlA={() => selectPile(pile)}>
+
       {#if view === 'sorted'}
          {#each sortedPile as card (card._id)}
             <Card {card} pile={pile} />

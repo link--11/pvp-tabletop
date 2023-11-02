@@ -18,7 +18,7 @@
 
 <DeckInput />
 
-<div class="flex">
+<div class="flex gap-2">
    <Board />
    <Connection />
 </div>

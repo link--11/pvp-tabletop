@@ -1,6 +1,6 @@
 <script>
-   import { chat, pushToChat, publishToChat, react } from '$lib/stores/connection.js'
-   import { onMount, tick } from 'svelte'
+   import { chat, publishToChat } from '$lib/stores/connection.js'
+   import { tick } from 'svelte'
 
    let message = ''
 
@@ -17,21 +17,15 @@
 
    let chatNode
 
-   onMount(() => {
+   function autoscroll () {
+      if (!chatNode) return
+      chatNode.scrollTop = chatNode.scrollHeight
+   }
 
-      function autoscroll () {
-         chatNode.scrollTop = chatNode.scrollHeight
-      }
-
-      const unmount = react('chatMessage', async ({ message, type }) => {
-         pushToChat(message, type)
-         await tick()
-         autoscroll()
-      })
-
-      return unmount
+   chat.subscribe(async () => {
+      await tick()
+      autoscroll()
    })
-
 </script>
 
 <div class="flex-1 flex flex-col gap-2 -mx-1 overflow-hidden">
@@ -48,6 +42,12 @@
                >{entry.message}</span>
          </p>
       {/each}
+   </div>
+
+   <div class="quick-messages">
+      <button on:click={() => publishToChat('Turn End', 'chat')}>Pass</button>
+      <button on:click={() => publishToChat('🤔', 'chat')}>🤔</button>
+      <button on:click={() => publishToChat('😠', 'chat')}>😠</button>
    </div>
 
    <form class="flex" on:submit|preventDefault={sendMessage}>
@@ -71,6 +71,22 @@
 
    .chat-button {
       @apply py-2 px-3 font-bold text-white bg-[var(--primary-color)] border border-dark-50 border-l-0 rounded-r-md;
+   }
+
+   .quick-messages {
+      @apply flex gap-1;
+   }
+
+   .quick-messages button {
+      @apply font-bold text-white bg-[var(--primary-color)] px-3 py-1.5 w-full;
+   }
+
+   .quick-messages button:first-child {
+      @apply rounded-l-md;
+   }
+
+   .quick-messages button:last-child {
+      @apply rounded-r-md;
    }
 
    .opp-message {
