@@ -4,10 +4,11 @@
    import { down } from '$lib/icons/paths.js'
    import Icon from '$lib/components/Icon.svelte'
 
-   import { selectPile, moveSelection } from '$lib/stores/player.js'
+   import { selectPile, moveSelection, resetSelection } from '$lib/stores/player.js'
 
    export let pile
    export let name = null
+   export let displayCount = true
    export let menu = undefined
 
    /* DnD */
@@ -32,14 +33,19 @@
       menu.open(rect.left, rect.bottom)
    }
 
+   function onCtx (e) {
+      resetSelection()
+      menu.open(e.clientX, e.clientY)
+   }
+
 </script>
 
 <div class="pile p-1 rounded flex flex-col focus:outline-none relative" tabindex="0"
-   on:contextmenu|preventDefault={(e) => menu.open(e.clientX, e.clientY)}
+   on:contextmenu={onCtx}
    use:ctrlA on:ctrlA={() => selectPile(pile)}
    use:dnd={dndConfig}>
 
-   {#if name}
+   {#if name && displayCount}
       <div class="count" on:click={openMenu} bind:this={heading}>
          {$pile.length}
          <div class="name gap-1 items-center"><span>{name}</span> <Icon path={down} class="text-xs" /></div>

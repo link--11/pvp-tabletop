@@ -2,9 +2,10 @@
    import { getContext } from 'svelte'
    import { cardImage } from '$lib/util/assets.js'
    import Pile from './Pile.svelte'
+   import ContextMenuOption from '$lib/components/ContextMenuOption.svelte'
 
    import { table, selectPile, cardSelection } from '$lib/stores/player.js'
-   const { openCardMenu } = getContext('boardActions')
+   const { openPile } = getContext('boardActions')
 
    $: top = $table[$table.length - 1]
 
@@ -42,28 +43,22 @@
       drag: onDrag
    }
 
-   function onClick (e) {
-      e.stopPropagation()
-      selectAll()
-   }
-
    function onCtx (e) {
-      e.preventDefault()
-      e.stopPropagation()
-      selectAll()
-      openCardMenu(e.clientX, e.clientY)
+      if (!$table.length) {
+         e.stopPropagation() // don't open the menu if table is empty
+      }
    }
 
 </script>
 
-<Pile pile={table}>
-   <div class="h-full flex justify-center items-center">
+<Pile pile={table} name="Table" displayCount={false}>
+   <div class="h-full flex justify-center items-center" on:contextmenu={onCtx}>
       <div class="relative w-max"
          style="margin-bottom: {($table.length - 1) * 35}px; margin-right: {$table.length > 1 ? 20 : 0}px"
          class:selected={selected($cardSelection)}
          class:dragged={$dragging && $cardSelection.includes(top)}
-         on:click={onClick}
-         on:contextmenu={onCtx}
+         on:click|stopPropagation={selectAll}
+         on:dblclick={() => openPile(table)}
          use:dnd={dndConfig}>
 
          {#if $table.length > 0}
@@ -77,6 +72,10 @@
          {/if}
       </div>
    </div>
+
+   <svelte:fragment slot="menu">
+      <ContextMenuOption click={() => openPile(table)} text="View All" shortcut="w" />
+   </svelte:fragment>
 </Pile>
 
 <style>

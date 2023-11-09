@@ -3,12 +3,10 @@
    import ContextMenu from '$lib/components/ContextMenu.svelte'
    import ContextMenuOption from '$lib/components/ContextMenuOption.svelte'
 
-   import { share } from '$lib/stores/connection.js'
+   import { share, publishLog } from '$lib/stores/connection.js'
    const { openOppSlotDetails } = getContext('boardActions')
 
    let slot
-   let pokemon
-
    let menu
 
    export function open (x, y, _slot) {
@@ -22,12 +20,14 @@
       share('oppDamageUpdated', { slotId: slot.id, damage: x })
    }
 
-   $: if (slot) ({ pokemon } = slot)
-   $: top = $pokemon ? $pokemon[ $pokemon.length - 1] : null
-   $: heading = top?.name
+   function target () {
+      publishLog(`Target: ${slot.name}`)
+      menu.close()
+   }
 </script>
 
-<ContextMenu bind:this={menu} {heading}>
+<ContextMenu bind:this={menu} heading={slot?.name}>
    <ContextMenuOption click={setDamage} text="Set Damage" />
+   <ContextMenuOption click={target} text="Declare Target" />
    <ContextMenuOption click={() => openOppSlotDetails(slot)} text="Show All" />
 </ContextMenu>

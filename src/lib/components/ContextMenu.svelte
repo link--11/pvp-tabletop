@@ -71,8 +71,8 @@
 </script>
 
 {#if isOpen}
-   <div bind:this={element} style="top: {y}px; left: {x}px;" class="z-25"
-      on:click={(e) => e.stopPropagation()}
+   <div bind:this={element} style="top: {y}px; left: {x}px;" class="z-25 relative"
+      on:click|stopPropagation
       use:mousedownOutside={true} on:outclick={close}
       use:escape on:esc={close}>
 

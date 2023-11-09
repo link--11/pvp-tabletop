@@ -29,7 +29,7 @@
          <div class="flex bg-[rgba(255,255,255,0.6)] rounded-md">
             <input type="text" class="p-1 rounded-md border border-black w-20"
                bind:value={$damage}
-               on:keydown={(e) => e.stopPropagation()}
+               on:keydown|stopPropagation
                on:change={updateDamage}>
             <span class="p-2 text-black">Damage</span>
          </div>

@@ -1,6 +1,7 @@
 <script>
    import { setContext, onMount } from 'svelte'
    import { dragging } from '$lib/dnd/pointer.js'
+   import { publishLog } from '$lib/stores/connection.js'
    import { pick, shuffle, pokemonHidden, handRevealed } from '$lib/stores/player.js'
 
    import Hand from './board/Hand.svelte'
@@ -39,7 +40,7 @@
    import OppSlotMenu from './dialogs/OppSlotMenu.svelte'
 
    import {
-      hand, deck, discard, prizes, lz, table,
+      hand, deck, discard, prizes, lz, table, stadium,
       draw,
       cardSelection, slotSelection, selectionPile, selectPile,
       moveSelection, toBench, toActive, toStadium,
@@ -121,7 +122,7 @@
    function keydown (e) {
       const key = e.key.toLowerCase()
 
-      if (!isNaN(e.key)) e.altKey ? openSelection(deck, parseInt(e.key)) : draw(parseInt(e.key))
+      if (Number.isFinite(e.key)) e.altKey ? openSelection(deck, parseInt(e.key)) : draw(parseInt(e.key))
 
       else if (key === 'd') moveSelection(discard)
       else if (key === 'h') moveSelection(hand)
@@ -129,7 +130,10 @@
       else if (key === 'p') moveSelection(prizes)
       else if (key === 'b') toBench()
       else if (key === 'a' && !e.ctrlKey) toActive()
-      else if (key === 'g') toStadium()
+      else if (key === 'g') {
+         if ($cardSelection.length) toStadium()
+         else if (stadium.val) publishLog(`Stadium: ${stadium.val.name}`)
+      }
 
       else if (key === 's') {
          if ($cardSelection.length || $slotSelection.length) moveSelection(deck, { shuffle: true })
@@ -143,6 +147,7 @@
       else if (key === 'e') startAE(true)
 
       else if (key === 'v') openPile(deck)
+      else if (key === 'w') openPile(table)
       else if (key === 'u') toggleMarker(deck)
 
       else if (key === 'w') moveSelection(table) // older version table shortcut without the extra functionality
@@ -175,7 +180,7 @@
 
 <Controls />
 
-<div class="h-screen overflow-y-auto flex-1">
+<div class="h-screen overflow-y-auto flex-1" on:contextmenu|capture|preventDefault>
    <div class="game flex flex-col h-full max-w-[1920px] m-auto select-none relative">
 
       <CardMenu bind:this={cardMenu} selection={cardSelection} />
@@ -388,7 +393,7 @@
 
    .play {
       grid-area: play;
-      z-index: 10; /* shares table space with opp */
+      z-index: 11; /* shares table space with opp */
    }
 
    .prizes2 {

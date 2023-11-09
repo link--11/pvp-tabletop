@@ -38,7 +38,6 @@
    }
 
    function onCtx (e) {
-      e.preventDefault()
       e.stopPropagation() // to not get overridden by the pile level context menu
 
       if (!$selection.includes(card)) {

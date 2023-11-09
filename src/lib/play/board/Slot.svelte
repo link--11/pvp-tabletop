@@ -65,7 +65,6 @@
    /* selections analog zu Card.svelte */
 
    function onClick (e) {
-      e.stopPropagation()
       if ($attaching || $evolving) attachSelection(slot)
       else if (e.altKey) openDetails(top)
       else if (e.shiftKey) openSlotDetails(slot)
@@ -73,8 +72,6 @@
    }
 
    function onCtx (e) {
-      e.preventDefault()
-
       if (!$selection.includes(slot)) {
          selectSlot(slot, false)
       }
@@ -85,7 +82,7 @@
 
 <div class="slot relative w-max z-15" style="margin-right: calc({$energy.length * 25 + $trainer.length * 35}px * var(--card-scale))"
    class:dragged={$dragging && $selection.includes(slot)}
-   on:click={onClick}
+   on:click|stopPropagation={onClick}
    on:contextmenu={onCtx}
    on:dblclick={() => openSlotDetails(slot)}
    use:dnd={dndConfig}>

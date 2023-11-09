@@ -25,7 +25,7 @@
 
 <div class="slot relative w-max z-15" style="margin-right: calc({$energy.length * 25 + $trainer.length * 35}px * var(--card-scale))"
    on:click|stopPropagation={onClick}
-   on:contextmenu|preventDefault={onCtx}>
+   on:contextmenu={onCtx}>
 
    {#if $damage}
       <span class="counter absolute bottom-1 left-1 z-15 rounded-full p-4 bg-red-500 text-white font-bold flex justify-center items-center">{$damage}</span>
