@@ -1,7 +1,6 @@
 {
-	"name": "tabletop-demo",
-	"version": "0.0.1",
-	"private": true,
+	"name": "pvp-tabletop",
+	"version": "0.1.0",
 	"scripts": {
 		"dev": "set NODE_ENV=dev && vite dev --port 3005",
 		"build": "set NODE_ENV=prod && vite build",
@@ -12,12 +11,10 @@
 		"@sveltejs/adapter-static": "^2.0.3",
 		"@sveltejs/kit": "next",
 		"dotenv": "^16.3.1",
-		"svelte": "^4.2.2",
-		"vite": "^4.5.0"
-	},
-	"type": "module",
-	"dependencies": {
 		"socket.io-client": "^4.7.2",
-		"vite-plugin-windicss": "^1.9.1"
-	}
+		"svelte": "^4.2.2",
+		"vite": "^4.5.0",
+		"vite-plugin-windicss": "^1.9.3"
+	},
+	"type": "module"
 }

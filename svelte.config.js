@@ -5,7 +5,7 @@ import 'dotenv/config'
 const config = {
    kit: {
       adapter: adapter({
-         pages: process.env.BUILD_DIR
+         pages: process.env.BUILD_DIR || 'build'
       })
    }
 }
