@@ -1,6 +1,7 @@
 <script>
    import { getContext } from 'svelte'
    import { cardImage } from '$lib/util/assets.js'
+   import { holdingCtrlOrCmd } from '$lib/util/ctrlcmd.js'
    import { dnd } from '$lib/dnd/actions.js'
    import { draggedCard, source } from '$lib/dnd/store.js'
    import { dragging } from '$lib/dnd/pointer.js'
@@ -34,7 +35,7 @@
       // further up is a click listener that reset the selection, so stop that
       e.stopPropagation()
 
-      selectCard(card, pile, e.ctrlKey) // if ctrl is pressed, add to selection instead of overwriting
+      selectCard(card, pile, holdingCtrlOrCmd(e)) // if ctrl is pressed, add to selection instead of overwriting
    }
 
    function onCtx (e) {

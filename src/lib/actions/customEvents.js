@@ -1,3 +1,5 @@
+import { holdingCtrlOrCmd } from '$lib/util/ctrlcmd.js'
+
 export function clickOutside (node, capture = false) {
 
    const click = (event) => {
@@ -55,7 +57,7 @@ export function ctrlA (node) {
    node.addEventListener('keydown', (e) => {
       const key = e.key.toLowerCase()
 
-      if (key === 'a' && e.ctrlKey) {
+      if (key === 'a' && holdingCtrlOrCmd(e)) {
          e.preventDefault()
          e.stopPropagation()
          node.dispatchEvent(new CustomEvent('ctrlA'))

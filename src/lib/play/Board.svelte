@@ -3,6 +3,7 @@
    import { dragging } from '$lib/dnd/pointer.js'
    import { publishLog } from '$lib/stores/connection.js'
    import { pick, shuffle, pokemonHidden, handRevealed } from '$lib/stores/player.js'
+   import { holdingCtrlOrCmd } from '$lib/util/ctrlcmd.js'
 
    import Hand from './board/Hand.svelte'
    import Deck from './board/Deck.svelte'
@@ -122,14 +123,15 @@
    function keydown (e) {
       const key = e.key.toLowerCase()
 
-      if (Number.isFinite(e.key)) e.altKey ? openSelection(deck, parseInt(e.key)) : draw(parseInt(e.key))
+      const digit = parseInt(e.code.slice(-1)) // e.code contains the number key pressed, e.g. "Digit1", even if it has been turned into a different key by holding Option on Mac
+      if (digit && Number.isInteger(digit)) e.altKey ? openSelection(deck, digit) : draw(digit)
 
       else if (key === 'd') moveSelection(discard)
       else if (key === 'h') moveSelection(hand)
       else if (key === 'l') moveSelection(lz)
       else if (key === 'p') moveSelection(prizes)
       else if (key === 'b') toBench()
-      else if (key === 'a' && !e.ctrlKey) toActive()
+      else if (key === 'a' && !holdingCtrlOrCmd(e)) toActive()
       else if (key === 'g') {
          if ($cardSelection.length) toStadium()
          else if (stadium.val) publishLog(`Stadium: ${stadium.val.name}`)

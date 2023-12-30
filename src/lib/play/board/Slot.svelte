@@ -1,6 +1,7 @@
 <script>
    import { getContext } from 'svelte'
    import { cardImage } from '$lib/util/assets.js'
+   import { holdingCtrlOrCmd } from '$lib/util/ctrlcmd.js'
    import { share } from '$lib/stores/connection.js'
 
    import {
@@ -68,7 +69,7 @@
       if ($attaching || $evolving) attachSelection(slot)
       else if (e.altKey) openDetails(top)
       else if (e.shiftKey) openSlotDetails(slot)
-      else selectSlot(slot, e.ctrlKey)
+      else selectSlot(slot, holdingCtrlOrCmd(e))
    }
 
    function onCtx (e) {

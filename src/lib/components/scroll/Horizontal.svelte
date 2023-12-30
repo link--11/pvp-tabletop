@@ -1,5 +1,6 @@
 <script>
    import { onMount } from 'svelte'
+   import { isMac } from '$lib/util/ctrlcmd.js'
 
    let container
 
@@ -13,7 +14,10 @@
    }
 
    onMount(() => {
-      container.addEventListener('wheel', scroll)
+      /* support for horizontal scrolling with a mouse wheel -
+         it breaks Mac trackpad scrolling, so don't use it there
+         (probably also Windows laptops if they use the same gestures, but idk) */
+      if (!isMac()) container.addEventListener('wheel', scroll)
    })
 </script>
 
