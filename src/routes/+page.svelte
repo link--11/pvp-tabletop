@@ -2,6 +2,8 @@
    import { browser } from '$app/environment'
    import { darkMode } from '$lib/stores/settings.js'
    import Board from '$lib/play/Board.svelte'
+   import { github } from '$lib/icons/paths.js'
+   import Icon from '$lib/components/Icon.svelte'
    import Connection from './Connection.svelte'
    import DeckInput from './DeckInput.svelte'
 
@@ -14,7 +16,9 @@
    <title>PvP Tabletop</title>
 </svelte:head>
 
-<span class="fixed z-15 bottom-2 right-4 opacity-75 font-bold">Beta</span>
+<a href="https://github.com/link--11/pvp-tabletop" class="fixed z-15 bottom-2 right-4 opacity-75 font-bold flex items-center gap-2">
+   Beta <Icon path={github} size={512}></Icon>
+</a>
 
 <DeckInput />
 
