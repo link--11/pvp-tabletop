@@ -1,8 +1,12 @@
 export function cardImage (card, size = null) {
    const host = 'https://limitlesstcg.nyc3.digitaloceanspaces.com'
+   const altHost = 'https://images.pokemontcg.io'
 
    const sizeMod = size ? '_' + size.toUpperCase() : ''
 
+   if (card.pokemontcgapi_id) {
+       return `${altHost}/${card.pokemontcgapi_id.replace(/\-/g,'/')}_hires.png`
+   }
    if (card.region === 'tpc') {
       return `${host}/tpc/${card.set}/${card.set}_${card.number}_R_JP${sizeMod}.png`
 
