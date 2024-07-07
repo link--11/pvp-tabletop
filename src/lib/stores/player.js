@@ -3,6 +3,7 @@ import { board } from './custom/board.js'
 import { pile, slot } from './custom/cards.js'
 import { writable } from './custom/writable.js'
 import { share, react, publishLog } from './connection.js'
+import { fixOld } from './oldCards.js'
 import { s } from '$lib/util/strings.js'
 import {
    logMove, logSlotMove, logPickup,
@@ -20,6 +21,7 @@ export const {
 
 export function importDeck (txt, cb, rd = false) {
    const callback = (res) => {
+      fixOld(res.cards)
       cards.set(res.cards)
       reset()
 
