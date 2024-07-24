@@ -1,12 +1,12 @@
 export function cardImage (card, size = null) {
-   const host = 'https://limitlesstcg.nyc3.digitaloceanspaces.com'
-   const altHost = 'https://images.pokemontcg.io'
+   if (card.ptcgApiCode) return ptcgApiImage(card, size)
+   else return limitlessImage(card, size)
+}
 
+function limitlessImage (card, size) {
+   const host = 'https://limitlesstcg.nyc3.digitaloceanspaces.com'
    const sizeMod = size ? '_' + size.toUpperCase() : ''
 
-   if (card.pokemontcgapi_id) {
-       return `${altHost}/${card.pokemontcgapi_id.replace(/\-/g,'/')}_hires.png`
-   }
    if (card.region === 'tpc') {
       return `${host}/tpc/${card.set}/${card.set}_${card.number}_R_JP${sizeMod}.png`
 
@@ -19,4 +19,15 @@ export function cardImage (card, size = null) {
 
       return `${host}/tpci/${card.set}/${card.set}_${num}_R_${lang.toUpperCase()}${sizeMod}.png`
    }
+}
+
+function ptcgApiImage (card, size) {
+   const set = card.ptcgApiCode
+
+   let number = card.number
+   if (card.set === 'DPP') number = `DP${number.padStart(2, '0')}`
+   else if (card.number === '?') number = 'question'
+
+   if (!(size === 'xs' || size === 'sm')) number += '_hires'
+   return `https://images.pokemontcg.io/${set}/${number}.png`
 }
