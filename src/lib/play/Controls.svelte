@@ -80,7 +80,7 @@
    }
 
    function reset () {
-      if (!checkPrizesAndConfirm('setup')) return
+      if (!checkPrizesAndConfirm('reset')) return
 
       resetBoard()
       turn = 0
