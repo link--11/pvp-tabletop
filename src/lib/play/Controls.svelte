@@ -68,27 +68,25 @@
    }
 
    function setup () {
-      if (!deckValid && $autoMulligan) return
+      if (!deckValid && $autoMulligan || !checkPrizesAndConfirm('setup')) return
 
-      if (checkPrizesAndConfirm('setup')) {
-         const mulligans = setupBoard()
-         if ($autoMulligan) showMessage(`${mulligans} Mulligans`)
+      const mulligans = setupBoard()
+      if ($autoMulligan) showMessage(`${mulligans} Mulligans`)
 
-         turn = 0
+      turn = 0
 
-         publishLog('Setup' + ($autoMulligan ? ` - ${mulligans} Mulligans` : ''))
-         shareBoardstate()
-      }
+      publishLog('Setup' + ($autoMulligan ? ` - ${mulligans} Mulligans` : ''))
+      shareBoardstate()
    }
 
    function reset () {
-      if(checkPrizesAndConfirm('reset')) {
-         resetBoard()
-         turn = 0
+      if (!checkPrizesAndConfirm('setup')) return
 
-         share('boardReset')
-         publishLog('Reset')
-      }
+      resetBoard()
+      turn = 0
+
+      share('boardReset')
+      publishLog('Reset')
    }
 
    function startTurn () {
