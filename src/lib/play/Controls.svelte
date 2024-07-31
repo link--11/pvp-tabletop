@@ -9,7 +9,7 @@
    import {
       cards, deck, hand, prizes, draw,
       vstarUsed, gxUsed, pokemonHidden,
-      reset as resetBoard,
+      reset as resetBoard, exportBoard,
       shareBoardstate
    } from '$lib/stores/player.js'
 
@@ -62,8 +62,14 @@
       draw7andPutPrizes()
    }
 
+   function checkPrizesAndConfirm(action) {
+      return !exportBoard().prizes.length || 
+         confirm(`You still have prizes remaining, are you sure you want to ${action}?`)
+   }
+
    function setup () {
-      if (!deckValid && $autoMulligan) return
+      if (!deckValid && $autoMulligan || !checkPrizesAndConfirm('setup')) return
+
       const mulligans = setupBoard()
       if ($autoMulligan) showMessage(`${mulligans} Mulligans`)
 
@@ -74,6 +80,8 @@
    }
 
    function reset () {
+      if (!checkPrizesAndConfirm('reset')) return
+
       resetBoard()
       turn = 0
 
