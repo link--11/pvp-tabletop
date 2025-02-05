@@ -11,6 +11,7 @@ const retroSets = {
    N3: 'neo3',
    N4: 'neo4',
    E1: 'ecard1',
+   BG: 'bp',
    E2: 'ecard2',
    E3: 'ecard3',
    RS: 'ex1',
